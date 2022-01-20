@@ -11,6 +11,8 @@
 		<testcontainers.version>1.16.3</testcontainers.version>
 		<sonar.organization>twendelmuth</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
 	<dependencies>
