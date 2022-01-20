@@ -60,7 +60,7 @@ public class ComponentsApiTest extends AbstractApiEndPointTest<ComponentsApi> {
 		ComponentsApi componentsApi = buildClassUnderTest(getStringFromResource("search_projects.json"));
 
 		ArgumentCaptor<String> endpointParameter = ArgumentCaptor.forClass(String.class);
-		SearchProjectResponse response = componentsApi.searchProjects("something", 100, 1);
+		componentsApi.searchProjects("something", 100, 1);
 
 		Mockito.verify(getSonarQubeServer()).doGet(endpointParameter.capture());
 		String filterParameter = endpointParameter.getValue().split("filter=")[1];
