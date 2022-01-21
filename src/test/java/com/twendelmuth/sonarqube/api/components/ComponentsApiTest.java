@@ -1,8 +1,10 @@
 package com.twendelmuth.sonarqube.api.components;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -14,8 +16,9 @@ import com.twendelmuth.sonarqube.api.components.response.SearchProjectResponse;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeClientJsonException;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeServerError;
 import com.twendelmuth.sonarqube.api.logging.SonarQubeTestLogger;
+import com.twendelmuth.sonarqube.testing.util.UrlTools;
 
-public class ComponentsApiTest extends AbstractApiEndPointTest<ComponentsApi> {
+class ComponentsApiTest extends AbstractApiEndPointTest<ComponentsApi> {
 
 	@Override
 	protected ComponentsApi buildTestUnderTest(SonarQubeServer sonarQubeServer, SonarQubeJsonMapper jsonMapper, SonarQubeTestLogger testLogger) {
@@ -63,8 +66,93 @@ public class ComponentsApiTest extends AbstractApiEndPointTest<ComponentsApi> {
 		componentsApi.searchProjects("something", 100, 1);
 
 		Mockito.verify(getSonarQubeServer()).doGet(endpointParameter.capture());
-		String filterParameter = endpointParameter.getValue().split("filter=")[1];
+		String filterParameter = extractFilterFromQuery(endpointParameter.getValue());
 		assertEquals("query%20%3D%20%22something%22", filterParameter);
+	}
+
+	@Test
+	void testSearchProjects_noKey() throws Exception {
+		ComponentsApi componentsApi = buildClassUnderTest(getStringFromResource("search_projects.json"));
+
+		ArgumentCaptor<String> endpointParameter = ArgumentCaptor.forClass(String.class);
+		componentsApi.searchProjects(null, 100, 1);
+
+		Mockito.verify(getSonarQubeServer()).doGet(endpointParameter.capture());
+		String endPoint = endpointParameter.getValue();
+		assertTrue(StringUtils.isBlank(extractFilterFromQuery(endPoint)));
+	}
+
+	@Test
+	void testSearchProjects_pageSizeOver500() {
+		testSearchProjectsPageSize(501, 500);
+	}
+
+	@Test
+	void testSearchProjects_pageSize500() throws Exception {
+		testSearchProjectsPageSize(500, 500);
+	}
+
+	@Test
+	void testSearchProjects_pageSize0() throws Exception {
+		testSearchProjectsPageSize(0, 1);
+	}
+
+	@Test
+	void testSearchProjects_pageNumber0() throws Exception {
+		testSearchProjectPageNumber(0, 1);
+	}
+
+	@Test
+	void testSearchProjects_pageNumber() throws Exception {
+		testSearchProjectPageNumber(1, 1);
+	}
+
+	private void testSearchProjectsPageSize(int pageSize, int expectedPageSize) {
+		ComponentsApi componentsApi = buildClassUnderTest(getStringFromResource("search_projects.json"));
+
+		ArgumentCaptor<String> endpointParameter = ArgumentCaptor.forClass(String.class);
+		componentsApi.searchProjects("", pageSize, 1);
+
+		try {
+			Mockito.verify(getSonarQubeServer()).doGet(endpointParameter.capture());
+		} catch (SonarQubeServerError e) {
+		}
+		String endPoint = endpointParameter.getValue();
+		assertEquals(expectedPageSize, extractPageSizeFromQuery(endPoint));
+	}
+
+	private void testSearchProjectPageNumber(int pageNumber, int expectedPageNumber) {
+		ComponentsApi componentsApi = buildClassUnderTest(getStringFromResource("search_projects.json"));
+
+		ArgumentCaptor<String> endpointParameter = ArgumentCaptor.forClass(String.class);
+		componentsApi.searchProjects("", 100, pageNumber);
+
+		try {
+			Mockito.verify(getSonarQubeServer()).doGet(endpointParameter.capture());
+		} catch (SonarQubeServerError e) {
+		}
+		String endPoint = endpointParameter.getValue();
+		assertEquals(expectedPageNumber, extractPageNumberFromQuery(endPoint));
+	}
+
+	private int extractPageSizeFromQuery(String query) {
+		String pageSizeParameter = UrlTools.extractQueryParameterMap(query).get("ps");
+		if (StringUtils.isNumeric(pageSizeParameter)) {
+			return Integer.valueOf(pageSizeParameter);
+		}
+		return 0;
+	}
+
+	private int extractPageNumberFromQuery(String query) {
+		String pageNumberParameter = UrlTools.extractQueryParameterMap(query).get("p");
+		if (StringUtils.isNumeric(pageNumberParameter)) {
+			return Integer.valueOf(pageNumberParameter);
+		}
+		return 0;
+	}
+
+	private String extractFilterFromQuery(String query) {
+		return UrlTools.extractQueryParameterMap(query).get("filter");
 	}
 
 }

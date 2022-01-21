@@ -29,9 +29,25 @@ public class ComponentsApi extends AbstractApiEndPoint {
 	 */
 	public SearchProjectResponse searchProjects(String searchKey, int pageSize, int page) {
 		try {
-			searchKey = URLEncoder.encode("query = \"" + searchKey + "\"", StandardCharsets.UTF_8.displayName());
-			searchKey = searchKey.replace("+", "%20");
-			String parameters = String.format("?p=%d&ps=%d&filter=%s", page, pageSize, searchKey);
+			if (pageSize > 500) {
+				pageSize = 500;
+			} else if (pageSize < 1) {
+				pageSize = 1;
+			}
+
+			if (page < 1) {
+				page = 1;
+			}
+
+			if (searchKey != null) {
+				searchKey = URLEncoder.encode("query = \"" + searchKey + "\"", StandardCharsets.UTF_8.displayName());
+				searchKey = searchKey.replace("+", "%20");
+			}
+
+			String parameters = String.format("?p=%d&ps=%d", page, pageSize);
+			if (searchKey != null) {
+				parameters += String.format("&filter=%s", searchKey);
+			}
 			return doGetWithErrorHandling(SEARCH_PROJECTS_ENDPOINT + parameters, SearchProjectResponse.class);
 		} catch (UnsupportedEncodingException e) {
 			throw new SonarQubeClientException("Had issues finding UTF-8 encoding?", e);
