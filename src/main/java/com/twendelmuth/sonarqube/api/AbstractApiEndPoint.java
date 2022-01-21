@@ -3,6 +3,8 @@ package com.twendelmuth.sonarqube.api;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.twendelmuth.sonarqube.api.exception.SonarQubeClientException;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeClientJsonException;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeServerError;
@@ -58,9 +60,15 @@ public class AbstractApiEndPoint {
 		SonarApiResponse originalResponse = null;
 		try {
 			originalResponse = httpFunction.apply(null);
-			response = jsonMapper.transformStringToObject(originalResponse.getReturnedBody(), responseClass);
+			if (StringUtils.isNotBlank(originalResponse.getReturnedBody())) {
+				response = jsonMapper.transformStringToObject(originalResponse.getReturnedBody(), responseClass);
+			}
 		} catch (SonarQubeClientJsonException e) {
-			getLogger().logError("Issues while parsing json response", e);
+			if (getLogger() != null) {
+				getLogger().logError("Issues while parsing json response", e);
+			} else {
+				throw new SonarQubeClientException("Issues while parsing json response - no logger configured", e);
+			}
 		}
 
 		if (response == null) {

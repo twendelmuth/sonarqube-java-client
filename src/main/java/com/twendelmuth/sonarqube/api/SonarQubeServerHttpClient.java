@@ -72,8 +72,12 @@ public class SonarQubeServerHttpClient implements SonarQubeServer {
 
 		try (CloseableHttpClient httpClient = getHttpClient()) {
 			CloseableHttpResponse response = httpClient.execute(httpPost);
-			return new SonarApiResponse(response.getCode(),
-					IOUtils.toString(response.getEntity().getContent(), response.getEntity().getContentEncoding()));
+			String content = "";
+			if (response.getEntity() != null) {
+				content = IOUtils.toString(response.getEntity().getContent(), response.getEntity().getContentEncoding());
+			}
+
+			return new SonarApiResponse(response.getCode(), content);
 		} catch (IOException ioe) {
 			return new SonarApiResponse(-1, ioe.getMessage());
 		}
@@ -86,8 +90,12 @@ public class SonarQubeServerHttpClient implements SonarQubeServer {
 
 		try (CloseableHttpClient httpClient = getHttpClient()) {
 			CloseableHttpResponse response = httpClient.execute(httpGet);
-			return new SonarApiResponse(response.getCode(),
-					IOUtils.toString(response.getEntity().getContent(), response.getEntity().getContentEncoding()));
+			String content = "";
+			if (response.getEntity() != null) {
+				content = IOUtils.toString(response.getEntity().getContent(), response.getEntity().getContentEncoding());
+			}
+
+			return new SonarApiResponse(response.getCode(), content);
 		} catch (IOException ioe) {
 			return new SonarApiResponse(-1, ioe.getMessage());
 		}
