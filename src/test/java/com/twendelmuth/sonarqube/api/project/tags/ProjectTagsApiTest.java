@@ -3,10 +3,10 @@ package com.twendelmuth.sonarqube.api.project.tags;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -30,7 +30,7 @@ class ProjectTagsApiTest extends AbstractApiEndPointTest<ProjectTagsApi> {
 	@Test
 	void setTags_withSet() throws Exception {
 		ProjectTagsApi api = buildClassUnderTest("{}");
-		Set<String> tagSet = new HashSet<>();
+		List<String> tagSet = new ArrayList<>();
 		tagSet.add("tag-1");
 		tagSet.add("tag-2");
 

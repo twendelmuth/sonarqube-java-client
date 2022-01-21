@@ -1,8 +1,8 @@
 package com.twendelmuth.sonarqube.api.project.tags;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.twendelmuth.sonarqube.api.AbstractApiEndPoint;
 import com.twendelmuth.sonarqube.api.SonarQubeJsonMapper;
@@ -25,7 +25,7 @@ public class ProjectTagsApi extends AbstractApiEndPoint {
 	 * @param projectKey which project should be updated?
 	 * @param tags Set with all the tags
 	 */
-	public SonarApiResponse setTags(String projectKey, Set<String> tags) {
+	public SonarApiResponse setTags(String projectKey, List<String> tags) {
 		StringBuilder tagBuilder = new StringBuilder();
 		tags.forEach(tag -> {
 			if (tagBuilder.length() > 0) {
