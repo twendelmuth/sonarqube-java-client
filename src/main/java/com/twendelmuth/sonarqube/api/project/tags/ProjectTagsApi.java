@@ -28,7 +28,7 @@ public class ProjectTagsApi extends AbstractApiEndPoint {
 	public SonarApiResponse setTags(String projectKey, Set<String> tags) {
 		StringBuilder tagBuilder = new StringBuilder();
 		tags.forEach(tag -> {
-			if (!tagBuilder.isEmpty()) {
+			if (tagBuilder.length() > 0) {
 				tagBuilder.append(",");
 			}
 			tagBuilder.append(tag);
