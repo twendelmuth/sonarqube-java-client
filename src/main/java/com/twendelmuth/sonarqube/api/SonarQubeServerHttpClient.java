@@ -13,6 +13,7 @@ import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.EntityDetails;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpRequest;
@@ -62,6 +63,20 @@ public class SonarQubeServerHttpClient implements SonarQubeServer {
 		return "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
 	}
 
+	private SonarApiResponse execute(final ClassicHttpRequest request) throws SonarQubeServerError {
+		try (CloseableHttpClient httpClient = getHttpClient()) {
+			CloseableHttpResponse response = httpClient.execute(request);
+			String content = "";
+			if (response.getEntity() != null) {
+				content = IOUtils.toString(response.getEntity().getContent(), response.getEntity().getContentEncoding());
+			}
+
+			return new SonarApiResponse(response.getCode(), content);
+		} catch (IOException ioe) {
+			return new SonarApiResponse(-1, ioe.getMessage());
+		}
+	}
+
 	@Override
 	public SonarApiResponse doPost(String apiEndPoint, Map<String, String> parameters) throws SonarQubeServerError {
 		HttpPost httpPost = new HttpPost(serverUrl + apiEndPoint);
@@ -70,36 +85,12 @@ public class SonarQubeServerHttpClient implements SonarQubeServer {
 		parameters.entrySet().forEach(entry -> params.add(new BasicNameValuePair(entry.getKey(), entry.getValue())));
 		httpPost.setEntity(new UrlEncodedFormEntity(params));
 
-		try (CloseableHttpClient httpClient = getHttpClient()) {
-			CloseableHttpResponse response = httpClient.execute(httpPost);
-			String content = "";
-			if (response.getEntity() != null) {
-				content = IOUtils.toString(response.getEntity().getContent(), response.getEntity().getContentEncoding());
-			}
-
-			return new SonarApiResponse(response.getCode(), content);
-		} catch (IOException ioe) {
-			return new SonarApiResponse(-1, ioe.getMessage());
-		}
-
+		return execute(httpPost);
 	}
 
 	@Override
 	public SonarApiResponse doGet(String apiEndPoint) throws SonarQubeServerError {
-		HttpGet httpGet = new HttpGet(serverUrl + apiEndPoint);
-
-		try (CloseableHttpClient httpClient = getHttpClient()) {
-			CloseableHttpResponse response = httpClient.execute(httpGet);
-			String content = "";
-			if (response.getEntity() != null) {
-				content = IOUtils.toString(response.getEntity().getContent(), response.getEntity().getContentEncoding());
-			}
-
-			return new SonarApiResponse(response.getCode(), content);
-		} catch (IOException ioe) {
-			return new SonarApiResponse(-1, ioe.getMessage());
-		}
-
+		return execute(new HttpGet(serverUrl + apiEndPoint));
 	}
 
 }
