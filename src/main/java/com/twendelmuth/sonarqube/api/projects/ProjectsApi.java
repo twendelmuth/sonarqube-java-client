@@ -12,18 +12,27 @@ import com.twendelmuth.sonarqube.api.response.SonarApiResponse;
 public class ProjectsApi extends AbstractApiEndPoint {
 	private static final String CREATE = "/api/projects/create";
 
+	private static final String DELETE = "/api/projects/delete";
+
 	public ProjectsApi(SonarQubeServer server, SonarQubeJsonMapper jsonMapper, SonarQubeLogger logger) {
 		super(server, jsonMapper, logger);
 	}
 
 	public boolean create(String name, String project) {
 		Map<String, String> parameters = new HashMap<>();
-
 		parameters.put("name", name);
 		parameters.put("project", project);
 
 		SonarApiResponse response = doPostWithErrorHandling(CREATE, parameters, SonarApiResponse.class);
-		return response.getStatusCode() == 200;
+		return response.getStatusCode() >= 200 && response.getStatusCode() < 300;
+	}
+
+	public boolean delete(String projectKey) {
+		Map<String, String> parameters = new HashMap<>();
+		parameters.put("project", projectKey);
+
+		SonarApiResponse response = doPostWithErrorHandling(DELETE, parameters, SonarApiResponse.class);
+		return response.getStatusCode() >= 200 && response.getStatusCode() < 300;
 	}
 
 }

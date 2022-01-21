@@ -20,7 +20,7 @@ class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
 
 	@Test
 	void createProject() {
-		ProjectsApi projectsApi = buildClassUnderTest(getStringFromResource("createProject.json"));
+		ProjectsApi projectsApi = buildClassUnderTest(204, getStringFromResource("createProject.json"));
 		assertTrue(projectsApi.create("project", "project"));
 	}
 
@@ -28,6 +28,12 @@ class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
 	void createProject_failed() {
 		ProjectsApi projectsApi = buildClassUnderTest(new SonarQubeServerError("error", 403, "Not authed"));
 		assertFalse(projectsApi.create("project", "project"));
+	}
+
+	@Test
+	void deleteProject() {
+		ProjectsApi projectsApi = buildClassUnderTest(204, null);
+		assertTrue(projectsApi.delete("project"));
 	}
 
 }

@@ -3,6 +3,7 @@ package com.twendelmuth.sonarqube.api;
 import com.twendelmuth.sonarqube.api.ce.ComputeEngineApi;
 import com.twendelmuth.sonarqube.api.components.ComponentsApi;
 import com.twendelmuth.sonarqube.api.logging.SonarQubeLogger;
+import com.twendelmuth.sonarqube.api.project.tags.ProjectTagsApi;
 import com.twendelmuth.sonarqube.api.projects.ProjectsApi;
 
 public class SonarQubeClient {
@@ -12,7 +13,7 @@ public class SonarQubeClient {
 	private String loginToken;
 
 	public SonarQubeClient(String serverUrl, String loginToken) {
-		if (serverUrl.endsWith("/")) {
+		while (serverUrl.endsWith("/")) {
 			serverUrl = serverUrl.substring(0, serverUrl.length() - 1);
 		}
 		this.serverUrl = serverUrl;
@@ -29,6 +30,10 @@ public class SonarQubeClient {
 
 	public ComponentsApi componentsApi() {
 		return new ComponentsApi(getSonarQubeServer(), getJsonMapper(), getLogger());
+	}
+
+	public ProjectTagsApi projectTagsApi() {
+		return new ProjectTagsApi(getSonarQubeServer(), getJsonMapper(), getLogger());
 	}
 
 	public final SonarQubeServer getSonarQubeServer() {

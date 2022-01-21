@@ -30,14 +30,18 @@ public abstract class AbstractApiEndPointTest<T extends AbstractApiEndPoint> {
 		sonarQubeServer = Mockito.mock(SonarQubeServer.class);
 	}
 
-	protected T buildClassUnderTest(String jsonResult) {
+	protected T buildClassUnderTest(int status, String jsonResult) {
 		try {
-			doReturn(new SonarApiResponse(200, jsonResult)).when(sonarQubeServer).doGet(any());
-			doReturn(new SonarApiResponse(200, jsonResult)).when(sonarQubeServer).doPost(any(), any());
+			doReturn(new SonarApiResponse(status, jsonResult)).when(sonarQubeServer).doGet(any());
+			doReturn(new SonarApiResponse(status, jsonResult)).when(sonarQubeServer).doPost(any(), any());
 		} catch (SonarQubeServerError e) {
 		}
 
 		return buildTestUnderTest(sonarQubeServer, jsonMapper, testLogger);
+	}
+
+	protected T buildClassUnderTest(String jsonResult) {
+		return buildClassUnderTest(200, jsonResult);
 	}
 
 	protected T buildClassUnderTest(String jsonResult, SonarQubeClientJsonException jsonException) {
@@ -62,9 +66,7 @@ public abstract class AbstractApiEndPointTest<T extends AbstractApiEndPoint> {
 
 	protected String getStringFromResource(String resource) {
 		try {
-			return IOUtils.toString(
-					this.getClass().getResourceAsStream(resource),
-					StandardCharsets.UTF_8);
+			return IOUtils.toString(this.getClass().getResourceAsStream(resource), StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			throw new RuntimeException("Couldn't read resource during test", e);
 		}
