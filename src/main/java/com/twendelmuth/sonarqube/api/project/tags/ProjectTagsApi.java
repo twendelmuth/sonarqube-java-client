@@ -42,7 +42,7 @@ public class ProjectTagsApi extends AbstractApiEndPoint {
 	 * Will <strong>overwrite</strong> any existing tags.
 	 * 
 	 * @param projectKey which project should be updated?
-	 * @param tags comma seperated set of tags.
+	 * @param tags comma separated set of tags.
 	 */
 	public SonarApiResponse setTags(String projectKey, String tags) {
 		Map<String, String> parameters = new HashMap<>();
