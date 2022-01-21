@@ -65,6 +65,17 @@ class SonarQubeClientIntegrationTest {
 	 * Integration test, executing:
 	 * 
 	 * {@link ComponentsApi#searchProjects(String, int, int)}
+	 */
+	@Test
+	void searchProjects_pageSizeOver1000() {
+		SearchProjectResponse searchResponse = client.componentsApi().searchProjects(projectKey, 1001, 1);
+		assertSearchResponse(searchResponse, 200, 1, projectKey);
+	}
+
+	/**
+	 * Integration test, executing:
+	 * 
+	 * {@link ComponentsApi#searchProjects(String, int, int)}
 	 * {@link ProjectTagsApi#setTags(String, String)}
 	 * and confirms that everything has been set by calling
 	 * {@link ComponentsApi#searchProjects(String, int, int)}
