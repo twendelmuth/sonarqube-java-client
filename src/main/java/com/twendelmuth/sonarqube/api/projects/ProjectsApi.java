@@ -1,5 +1,6 @@
 package com.twendelmuth.sonarqube.api.projects;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.twendelmuth.sonarqube.api.AbstractApiEndPoint;
@@ -18,12 +19,19 @@ public class ProjectsApi extends AbstractApiEndPoint {
 	}
 
 	public boolean create(String name, String project) {
-		SonarApiResponse response = doPostWithErrorHandling(CREATE, Map.of("name", name, "project", project), SonarApiResponse.class);
+		Map<String, String> parameters = new HashMap<>();
+		parameters.put("name", name);
+		parameters.put("project", project);
+
+		SonarApiResponse response = doPostWithErrorHandling(CREATE, parameters, SonarApiResponse.class);
 		return response.getStatusCode() >= 200 && response.getStatusCode() < 300;
 	}
 
 	public boolean delete(String projectKey) {
-		SonarApiResponse response = doPostWithErrorHandling(DELETE, Map.of("project", projectKey), SonarApiResponse.class);
+		Map<String, String> parameters = new HashMap<>();
+		parameters.put("project", projectKey);
+
+		SonarApiResponse response = doPostWithErrorHandling(DELETE, parameters, SonarApiResponse.class);
 		return response.getStatusCode() >= 200 && response.getStatusCode() < 300;
 	}
 
