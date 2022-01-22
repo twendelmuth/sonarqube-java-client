@@ -31,7 +31,7 @@ class ActivitiesParameterTest {
 
 	@Test
 	void maxExecutedAt() {
-		assertEquals("?maxExecutedAt=2022-01-01T01:01:01+0000",
+		assertEquals("?maxExecutedAt=2022-01-01T01:01:01%2B0000",
 				ActivitiesParameter.builder()
 						.maxExecutedAt(time)
 						.build().toParameterString());
@@ -39,7 +39,7 @@ class ActivitiesParameterTest {
 
 	@Test
 	void minSubmittedAt() {
-		assertEquals("?minSubmittedAt=2022-01-01T01:01:01+0000",
+		assertEquals("?minSubmittedAt=2022-01-01T01:01:01%2B0000",
 				ActivitiesParameter.builder()
 						.minSubmittedAt(time)
 						.build().toParameterString());
@@ -111,16 +111,34 @@ class ActivitiesParameterTest {
 	}
 
 	@Test
-	void all() {
+	void allWithQuery() {
 		assertEquals(
-				"?component=c1&maxExecutedAt=2022-01-01T01:01:01+0000&minSubmittedAt=2022-01-01T01:01:01+0000&onlyCurrents=false&ps=30&q=Apache&status=SUCCESS,FAILED,CANCELED,PENDING,IN_PROGRESS&type=REPORT",
+				"?maxExecutedAt=2022-01-01T01:01:01%2B0000&minSubmittedAt=2022-01-01T01:01:01%2B0000&onlyCurrents=false&ps=30&q=Apache&status=SUCCESS,FAILED,CANCELED,PENDING,IN_PROGRESS&type=REPORT",
+				ActivitiesParameter.builder()
+						.maxExecutedAt(time)
+						.minSubmittedAt(time)
+						.onlyCurrents(false)
+						.pageSize(30)
+						.query("Apache")
+						.addStatus(ActivitiesStatus.SUCCESS)
+						.addStatus(ActivitiesStatus.FAILED)
+						.addStatus(ActivitiesStatus.CANCELED)
+						.addStatus(ActivitiesStatus.PENDING)
+						.addStatus(ActivitiesStatus.IN_PROGRESS)
+						.type(ActivitiesType.REPORT)
+						.build().toParameterString());
+	}
+
+	@Test
+	void allWithComponent() {
+		assertEquals(
+				"?component=c1&maxExecutedAt=2022-01-01T01:01:01%2B0000&minSubmittedAt=2022-01-01T01:01:01%2B0000&onlyCurrents=false&ps=30&status=SUCCESS,FAILED,CANCELED,PENDING,IN_PROGRESS&type=REPORT",
 				ActivitiesParameter.builder()
 						.component("c1")
 						.maxExecutedAt(time)
 						.minSubmittedAt(time)
 						.onlyCurrents(false)
 						.pageSize(30)
-						.query("Apache")
 						.addStatus(ActivitiesStatus.SUCCESS)
 						.addStatus(ActivitiesStatus.FAILED)
 						.addStatus(ActivitiesStatus.CANCELED)

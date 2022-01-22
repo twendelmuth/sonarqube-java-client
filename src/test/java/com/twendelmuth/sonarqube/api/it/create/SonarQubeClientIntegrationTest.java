@@ -3,6 +3,12 @@ package com.twendelmuth.sonarqube.api.it.create;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +16,11 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.twendelmuth.sonarqube.api.SonarQubeClient;
+import com.twendelmuth.sonarqube.api.ce.ActivitiesParameter;
+import com.twendelmuth.sonarqube.api.ce.ActivitiesParameter.ActivitiesStatus;
+import com.twendelmuth.sonarqube.api.ce.ActivitiesParameter.ActivitiesType;
+import com.twendelmuth.sonarqube.api.ce.ComputeEngineApi;
+import com.twendelmuth.sonarqube.api.ce.response.ActivityResponse;
 import com.twendelmuth.sonarqube.api.components.ComponentsApi;
 import com.twendelmuth.sonarqube.api.components.response.SearchProjectResponse;
 import com.twendelmuth.sonarqube.api.it.SonarQubeClientIntegrationHelper;
@@ -136,6 +147,69 @@ class SonarQubeClientIntegrationTest {
 				() -> assertEquals(2, searchResponse.getComponents().get(0).getTags().size()),
 				() -> assertEquals("tag1", searchResponse.getComponents().get(0).getTags().get(0)),
 				() -> assertEquals("tag2", searchResponse.getComponents().get(0).getTags().get(1)));
+	}
+
+	/**
+	 * Check that SonarQube accepts our implementation of getActivities without any parameters
+	 * 
+	 * {@link ComputeEngineApi#getActivities(ActivitiesParameter)}
+	 */
+	@Test
+	void activities_noParams() {
+		ActivityResponse response = client.computeEngine().getActivities(ActivitiesParameter.builder().build());
+		assertEquals("Expected status 200, body: " + response.getReturnedBody(), 200, response.getStatusCode());
+	}
+
+	/**
+	 * Check that SonarQube accepts our implementation of getActivities with all parameters (no query param)
+	 * 
+	 * {@link ComputeEngineApi#getActivities(ActivitiesParameter)}
+	 */
+	@Test
+	void activities_allParamsWithComponent() {
+		ZonedDateTime time = ZonedDateTime.ofInstant(LocalDateTime.of(2022, Month.JANUARY, 1, 1, 1, 1, 0), ZoneOffset.UTC, ZoneId.of("Z"));
+
+		ActivityResponse response = client.computeEngine().getActivities(ActivitiesParameter.builder()
+				.component(projectKey)
+				.maxExecutedAt(time)
+				.minSubmittedAt(time)
+				.onlyCurrents(false)
+				.pageSize(30)
+				.addStatus(ActivitiesStatus.SUCCESS)
+				.addStatus(ActivitiesStatus.FAILED)
+				.addStatus(ActivitiesStatus.CANCELED)
+				.addStatus(ActivitiesStatus.PENDING)
+				.addStatus(ActivitiesStatus.IN_PROGRESS)
+				.type(ActivitiesType.REPORT)
+				.build());
+
+		assertEquals("Expected status 200, body: " + response.getReturnedBody(), 200, response.getStatusCode());
+	}
+
+	/**
+	 * Check that SonarQube accepts our implementation of getActivities with all parameters (no components param)
+	 * 
+	 * {@link ComputeEngineApi#getActivities(ActivitiesParameter)}
+	 */
+	@Test
+	void activities_allParamsWithApache() {
+		ZonedDateTime time = ZonedDateTime.ofInstant(LocalDateTime.of(2022, Month.JANUARY, 1, 1, 1, 1, 0), ZoneOffset.UTC, ZoneId.of("Z"));
+
+		ActivityResponse response = client.computeEngine().getActivities(ActivitiesParameter.builder()
+				.query("Apache")
+				.maxExecutedAt(time)
+				.minSubmittedAt(time)
+				.onlyCurrents(false)
+				.pageSize(30)
+				.addStatus(ActivitiesStatus.SUCCESS)
+				.addStatus(ActivitiesStatus.FAILED)
+				.addStatus(ActivitiesStatus.CANCELED)
+				.addStatus(ActivitiesStatus.PENDING)
+				.addStatus(ActivitiesStatus.IN_PROGRESS)
+				.type(ActivitiesType.REPORT)
+				.build());
+
+		assertEquals("Expected status 200, body: " + response.getReturnedBody(), 200, response.getStatusCode());
 	}
 
 }
