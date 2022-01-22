@@ -14,12 +14,11 @@ public class ComputeEngineApi extends AbstractApiEndPoint {
 		super(server, jsonMapper, logger);
 	}
 
-	public ActivityResponse getActivities(int pageSize) {
-		if (pageSize > 1000) {
-			pageSize = 1000;
+	public ActivityResponse getActivities(ActivitiesParameter parameter) {
+		if (parameter == null) {
+			parameter = new ActivitiesParameter();
 		}
-
-		return doGetWithErrorHandling(ACTIVITY + "?ps=" + pageSize, ActivityResponse.class);
+		return doGetWithErrorHandling(ACTIVITY + parameter.toParameterString(), ActivityResponse.class);
 	}
 
 }

@@ -23,7 +23,18 @@ class ComputeEngineApiTest extends AbstractApiEndPointTest<ComputeEngineApi> {
 	void testActivityResult() {
 		ComputeEngineApi computeEngineApi = buildClassUnderTest(getStringFromResource("activity_result.json"));
 
-		ActivityResponse response = computeEngineApi.getActivities(1000);
+		ActivityResponse response = computeEngineApi.getActivities(ActivitiesParameter.builder().build());
+		assertEquals(2, response.getTasks().size());
+		assertEquals("project_1", response.getTasks().get(0).getComponentKey());
+		assertEquals("project_2", response.getTasks().get(1).getComponentKey());
+		assertEquals(0, getTestLogger().countErrorMessages(), "No error messages expected");
+	}
+
+	@Test
+	void testActivityResult_parameterNullSafety() {
+		ComputeEngineApi computeEngineApi = buildClassUnderTest(getStringFromResource("activity_result.json"));
+
+		ActivityResponse response = computeEngineApi.getActivities(null);
 		assertEquals(2, response.getTasks().size());
 		assertEquals("project_1", response.getTasks().get(0).getComponentKey());
 		assertEquals("project_2", response.getTasks().get(1).getComponentKey());
@@ -34,7 +45,7 @@ class ComputeEngineApiTest extends AbstractApiEndPointTest<ComputeEngineApi> {
 	void testActivityResult_notAuthed() {
 		ComputeEngineApi computeEngineApi = buildClassUnderTest(new SonarQubeServerError("Forbidden", 403, "Please provide API Token!"));
 
-		ActivityResponse response = computeEngineApi.getActivities(1000);
+		ActivityResponse response = computeEngineApi.getActivities(ActivitiesParameter.builder().build());
 		assertNotNull(response);
 		assertEquals(403, response.getStatusCode());
 		assertEquals(1, getTestLogger().countErrorMessages(), "Expected to have one log warning!");
@@ -45,7 +56,7 @@ class ComputeEngineApiTest extends AbstractApiEndPointTest<ComputeEngineApi> {
 		ComputeEngineApi computeEngineApi = buildClassUnderTest(getStringFromResource("activity_result.json"),
 				new SonarQubeClientJsonException("Something happened", null));
 
-		ActivityResponse response = computeEngineApi.getActivities(1000);
+		ActivityResponse response = computeEngineApi.getActivities(ActivitiesParameter.builder().build());
 		assertNotNull(response);
 		assertEquals(200, response.getStatusCode());
 		assertEquals(1, getTestLogger().countErrorMessages(), "Expected to have one log warning!");
