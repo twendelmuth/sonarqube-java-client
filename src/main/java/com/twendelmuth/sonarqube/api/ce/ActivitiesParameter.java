@@ -34,11 +34,11 @@ public class ActivitiesParameter {
 		}
 
 		if (maxExecutedAt != null) {
-			addParameter(parameterBuilder, "maxExecutedAt", DATE_FORMATTER.format(maxExecutedAt));
+			addParameter(parameterBuilder, "maxExecutedAt", formatDateForParameter(maxExecutedAt));
 		}
 
 		if (minSubmittedAt != null) {
-			addParameter(parameterBuilder, "minSubmittedAt", DATE_FORMATTER.format(minSubmittedAt));
+			addParameter(parameterBuilder, "minSubmittedAt", formatDateForParameter(minSubmittedAt));
 		}
 
 		if (onlyCurrents != null) {
@@ -46,6 +46,12 @@ public class ActivitiesParameter {
 		}
 
 		if (pageSize != null) {
+			if (pageSize < 1) {
+				pageSize = 1;
+			} else if (pageSize > 1000) {
+				pageSize = 1000;
+			}
+
 			addParameter(parameterBuilder, "ps", pageSize.toString());
 		}
 
@@ -64,13 +70,17 @@ public class ActivitiesParameter {
 		return parameterBuilder.toString();
 	}
 
+	private String formatDateForParameter(ZonedDateTime date) {
+		return DATE_FORMATTER.format(date).replace("+", "%2B");
+	}
+
 	private String getStatusString(Set<ActivitiesStatus> statusSet) {
 		StringBuilder statusString = new StringBuilder();
-		statusSet.forEach(status -> {
+		statusSet.forEach(innerStatus -> {
 			if (statusString.length() > 0) {
 				statusString.append(",");
 			}
-			statusString.append(status.name());
+			statusString.append(innerStatus.name());
 		});
 
 		return statusString.toString();
@@ -110,9 +120,14 @@ public class ActivitiesParameter {
 	public class ActivitiesParameterBuilder {
 		private ActivitiesParameter build = new ActivitiesParameter();
 
-		public ActivitiesParameterBuilder component(String component) {
+		/**
+		 * 
+		 * @param component
+		 * @return
+		 */
+		public ActivitiesParameterBuilderComponentAlreadySet component(String component) {
 			build.component = component;
-			return this;
+			return new ActivitiesParameterBuilderComponentAlreadySet(this);
 		}
 
 		public ActivitiesParameterBuilder maxExecutedAt(ZonedDateTime maxExecutedAt) {
@@ -131,19 +146,13 @@ public class ActivitiesParameter {
 		}
 
 		public ActivitiesParameterBuilder pageSize(int pageSize) {
-			if (pageSize < 1) {
-				pageSize = 1;
-			} else if (pageSize > 1000) {
-				pageSize = 1000;
-			}
-
 			build.pageSize = pageSize;
 			return this;
 		}
 
-		public ActivitiesParameterBuilder query(String query) {
+		public ActivitiesParameterBuilderQueryAlreadySet query(String query) {
 			build.query = query;
-			return this;
+			return new ActivitiesParameterBuilderQueryAlreadySet(this);
 		}
 
 		public ActivitiesParameterBuilder addStatus(ActivitiesStatus status) {
@@ -152,6 +161,100 @@ public class ActivitiesParameter {
 		}
 
 		public ActivitiesParameterBuilder type(ActivitiesType type) {
+			build.type = type;
+			return this;
+		}
+
+		public ActivitiesParameter build() {
+			return build;
+		}
+	}
+
+	public class ActivitiesParameterBuilderQueryAlreadySet {
+		private ActivitiesParameter build;
+
+		public ActivitiesParameterBuilderQueryAlreadySet(ActivitiesParameterBuilder parameterBuilder) {
+			this.build = parameterBuilder.build;
+		}
+
+		public ActivitiesParameterBuilderQueryAlreadySet maxExecutedAt(ZonedDateTime maxExecutedAt) {
+			build.maxExecutedAt = maxExecutedAt;
+			return this;
+		}
+
+		public ActivitiesParameterBuilderQueryAlreadySet minSubmittedAt(ZonedDateTime minSubmittedAt) {
+			build.minSubmittedAt = minSubmittedAt;
+			return this;
+		}
+
+		public ActivitiesParameterBuilderQueryAlreadySet onlyCurrents(boolean onlyCurrents) {
+			build.onlyCurrents = onlyCurrents;
+			return this;
+		}
+
+		public ActivitiesParameterBuilderQueryAlreadySet pageSize(int pageSize) {
+			build.pageSize = pageSize;
+			return this;
+		}
+
+		public ActivitiesParameterBuilderQueryAlreadySet query(String query) {
+			build.query = query;
+			return this;
+		}
+
+		public ActivitiesParameterBuilderQueryAlreadySet addStatus(ActivitiesStatus status) {
+			build.status.add(status);
+			return this;
+		}
+
+		public ActivitiesParameterBuilderQueryAlreadySet type(ActivitiesType type) {
+			build.type = type;
+			return this;
+		}
+
+		public ActivitiesParameter build() {
+			return build;
+		}
+	}
+
+	public class ActivitiesParameterBuilderComponentAlreadySet {
+		private ActivitiesParameter build;
+
+		public ActivitiesParameterBuilderComponentAlreadySet(ActivitiesParameterBuilder parameterBuilder) {
+			this.build = parameterBuilder.build;
+		}
+
+		public ActivitiesParameterBuilderComponentAlreadySet component(String component) {
+			build.component = component;
+			return this;
+		}
+
+		public ActivitiesParameterBuilderComponentAlreadySet maxExecutedAt(ZonedDateTime maxExecutedAt) {
+			build.maxExecutedAt = maxExecutedAt;
+			return this;
+		}
+
+		public ActivitiesParameterBuilderComponentAlreadySet minSubmittedAt(ZonedDateTime minSubmittedAt) {
+			build.minSubmittedAt = minSubmittedAt;
+			return this;
+		}
+
+		public ActivitiesParameterBuilderComponentAlreadySet onlyCurrents(boolean onlyCurrents) {
+			build.onlyCurrents = onlyCurrents;
+			return this;
+		}
+
+		public ActivitiesParameterBuilderComponentAlreadySet pageSize(int pageSize) {
+			build.pageSize = pageSize;
+			return this;
+		}
+
+		public ActivitiesParameterBuilderComponentAlreadySet addStatus(ActivitiesStatus status) {
+			build.status.add(status);
+			return this;
+		}
+
+		public ActivitiesParameterBuilderComponentAlreadySet type(ActivitiesType type) {
 			build.type = type;
 			return this;
 		}
