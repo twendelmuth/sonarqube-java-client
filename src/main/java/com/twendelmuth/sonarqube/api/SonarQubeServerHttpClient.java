@@ -26,7 +26,7 @@ import com.twendelmuth.sonarqube.api.exception.SonarQubeServerError;
 import com.twendelmuth.sonarqube.api.response.SonarApiResponse;
 
 public class SonarQubeServerHttpClient implements SonarQubeServer {
-	private static final String USER_AGENT = "SonarQubeJavaClient";
+	private static final String USER_AGENT = "com.twendelmuth.SonarQubeJavaClient";
 
 	private final String serverUrl;
 
