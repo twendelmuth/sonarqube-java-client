@@ -62,6 +62,22 @@ class ActivitiesParameterTest {
 	}
 
 	@Test
+	void pageSize_escape0() {
+		assertEquals("?ps=1",
+				ActivitiesParameter.builder()
+						.pageSize(0)
+						.build().toParameterString());
+	}
+
+	@Test
+	void pageSize_escape1001() {
+		assertEquals("?ps=1000",
+				ActivitiesParameter.builder()
+						.pageSize(1001)
+						.build().toParameterString());
+	}
+
+	@Test
 	void query() {
 		assertEquals("?q=Apache",
 				ActivitiesParameter.builder()

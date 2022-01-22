@@ -131,6 +131,12 @@ public class ActivitiesParameter {
 		}
 
 		public ActivitiesParameterBuilder pageSize(int pageSize) {
+			if (pageSize < 1) {
+				pageSize = 1;
+			} else if (pageSize > 1000) {
+				pageSize = 1000;
+			}
+
 			build.pageSize = pageSize;
 			return this;
 		}
