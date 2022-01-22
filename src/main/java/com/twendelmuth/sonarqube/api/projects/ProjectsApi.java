@@ -18,6 +18,13 @@ public class ProjectsApi extends AbstractApiEndPoint {
 		super(server, jsonMapper, logger);
 	}
 
+	/**
+	 * Create a project.
+	 * Requires 'Create Projects' permission
+	 * @param name Name of the project. If name is longer than 500, it is abbreviated.
+	 * @param project Key of the project
+	 * @return If the operation was successful
+	 */
 	public boolean create(String name, String project) {
 		Map<String, String> parameters = new HashMap<>();
 		parameters.put("name", name);
@@ -27,6 +34,11 @@ public class ProjectsApi extends AbstractApiEndPoint {
 		return response.getStatusCode() >= 200 && response.getStatusCode() < 300;
 	}
 
+	/**
+	 * Delete a project.
+	 * Requires 'Administer System' permission or 'Administer' permission on the project.
+	 * @return If the operation was successful
+	 */
 	public boolean delete(String projectKey) {
 		Map<String, String> parameters = new HashMap<>();
 		parameters.put("project", projectKey);

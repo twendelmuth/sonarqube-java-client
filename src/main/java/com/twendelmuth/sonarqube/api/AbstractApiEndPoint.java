@@ -26,11 +26,11 @@ public class AbstractApiEndPoint {
 		this.logger = logger;
 	}
 
-	public SonarQubeLogger getLogger() {
+	protected SonarQubeLogger getLogger() {
 		return logger;
 	}
 
-	public SonarQubeServer getServer() {
+	protected SonarQubeServer getServer() {
 		return server;
 	}
 

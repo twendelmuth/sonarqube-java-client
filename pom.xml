@@ -4,7 +4,7 @@
 	<artifactId>SonarQubeClient</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>SonarQube API Client</name>
-	<description>Simple Lib to interact with the SonarQube API.</description>
+	<description>Simple Lib to interact with the SonarQube API</description>
 	<properties>
 		<java.version>8</java.version>
 		<source.endcoding>UTF-8</source.endcoding>
@@ -15,6 +15,17 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<jacoco.version>0.8.7</jacoco.version>
 	</properties>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+	<scm>
+		<connection>scm:git:git://github.com/twendelmuth/sonarqube-java-client.git</connection>
+		<developerConnection>scm:git:ssh://github.com:twendelmuth/sonarqube-java-client.git</developerConnection>
+		<url>https://github.com/twendelmuth/sonarqube-java-client</url>
+	</scm>
 
 	<dependencies>
 		<dependency>

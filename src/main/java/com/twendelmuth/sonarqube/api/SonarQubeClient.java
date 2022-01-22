@@ -36,12 +36,12 @@ public class SonarQubeClient {
 		return new ProjectTagsApi(getSonarQubeServer(), getJsonMapper(), getLogger());
 	}
 
-	public final SonarQubeServer getSonarQubeServer() {
+	public SonarQubeServer getSonarQubeServer() {
 		return new SonarQubeServerHttpClient(serverUrl, loginToken);
 	}
 
 	public SonarQubeLogger getLogger() {
-		return null;
+		return new NoSonarQubeLogger();
 	}
 
 	public SonarQubeJsonMapper getJsonMapper() {

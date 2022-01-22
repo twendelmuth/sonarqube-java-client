@@ -4,6 +4,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -16,6 +18,7 @@ import com.twendelmuth.sonarqube.api.components.response.SearchProjectResponse;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeClientJsonException;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeServerError;
 import com.twendelmuth.sonarqube.api.logging.SonarQubeTestLogger;
+import com.twendelmuth.sonarqube.api.response.Component;
 import com.twendelmuth.sonarqube.testing.util.UrlTools;
 
 class ComponentsApiTest extends AbstractApiEndPointTest<ComponentsApi> {
@@ -105,6 +108,35 @@ class ComponentsApiTest extends AbstractApiEndPointTest<ComponentsApi> {
 	@Test
 	void testSearchProjects_pageNumber() throws Exception {
 		testSearchProjectPageNumber(1, 1);
+	}
+
+	@Test
+	void testAutomaticPaging_page1() {
+		ComponentsApi componentsApi = buildClassUnderTest(getStringFromResource("search_projects.json"));
+
+		List<Component> allComponents = componentsApi.searchProjects("something");
+		assertNotNull(allComponents);
+		assertEquals(3, allComponents.size());
+		assertEquals("my_project", allComponents.get(0).getKey());
+		assertEquals(2, allComponents.get(0).getTags().size());
+	}
+
+	@Test
+	void testAutomaticPaging_page3() {
+		ComponentsApi componentsApi = buildClassUnderTest(getStringFromResource("search_projects_page3.json"));
+
+		List<Component> allComponents = componentsApi.searchProjects("something");
+		assertNotNull(allComponents);
+		assertEquals(9, allComponents.size());
+	}
+
+	@Test
+	void testAutomaticPaging_page3_300total() {
+		ComponentsApi componentsApi = buildClassUnderTest(getStringFromResource("search_projects_page3_300total.json"));
+
+		List<Component> allComponents = componentsApi.searchProjects("something");
+		assertNotNull(allComponents);
+		assertEquals(9, allComponents.size());
 	}
 
 	private void testSearchProjectsPageSize(int pageSize, int expectedPageSize) {
