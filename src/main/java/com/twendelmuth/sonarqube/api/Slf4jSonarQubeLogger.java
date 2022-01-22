@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.twendelmuth.sonarqube.api.logging.SonarQubeLogger;
 
 public class Slf4jSonarQubeLogger implements SonarQubeLogger {
-	private static Logger LOGGER = LoggerFactory.getLogger(Slf4jSonarQubeLogger.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Slf4jSonarQubeLogger.class);
 
 	@Override
 	public void logInfo(String message) {
