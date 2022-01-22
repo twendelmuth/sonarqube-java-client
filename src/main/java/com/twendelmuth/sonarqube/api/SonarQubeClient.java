@@ -41,7 +41,7 @@ public class SonarQubeClient {
 	}
 
 	public SonarQubeLogger getLogger() {
-		return new NoSonarQubeLogger();
+		return new Slf4jSonarQubeLogger();
 	}
 
 	public SonarQubeJsonMapper getJsonMapper() {
