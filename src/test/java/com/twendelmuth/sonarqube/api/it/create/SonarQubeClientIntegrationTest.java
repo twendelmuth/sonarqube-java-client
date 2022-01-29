@@ -11,9 +11,9 @@ import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import com.twendelmuth.sonarqube.api.SonarQubeClient;
 import com.twendelmuth.sonarqube.api.ce.ActivitiesParameter;
@@ -23,7 +23,8 @@ import com.twendelmuth.sonarqube.api.ce.ComputeEngineApi;
 import com.twendelmuth.sonarqube.api.ce.response.ActivityResponse;
 import com.twendelmuth.sonarqube.api.components.ComponentsApi;
 import com.twendelmuth.sonarqube.api.components.response.SearchProjectResponse;
-import com.twendelmuth.sonarqube.api.it.SonarQubeClientIntegrationHelper;
+import com.twendelmuth.sonarqube.api.it.docker.SonarQubeDockerContainer;
+import com.twendelmuth.sonarqube.api.it.docker.SonarQubeVersion;
 import com.twendelmuth.sonarqube.api.project.tags.ProjectTagsApi;
 import com.twendelmuth.sonarqube.api.response.SonarApiResponse;
 
@@ -34,22 +35,17 @@ class SonarQubeClientIntegrationTest {
 
 	private final String projectKey = "my-project";
 
-	@BeforeEach
-	void setup() {
-		client = new SonarQubeClientIntegrationHelper().getSonarQubeClient();
-		createProjectAndAssertSuccess(projectKey);
-	}
-
 	@AfterEach
 	void teardown() {
-		deleteProject(projectKey);
+		deleteProject(client, projectKey);
+		client = null;
 	}
 
-	private void createProjectAndAssertSuccess(String key) {
+	private void createProjectAndAssertSuccess(SonarQubeClient client, String key) {
 		client.projectsApi().create(key, key);
 	}
 
-	private void deleteProject(String key) {
+	private void deleteProject(SonarQubeClient client, String key) {
 		client.projectsApi().delete(key);
 	}
 
@@ -61,13 +57,24 @@ class SonarQubeClientIntegrationTest {
 				() -> assertEquals(projectKey, searchResponse.getComponents().get(0).getKey()));
 	}
 
+	private SonarQubeClient createClient(SonarQubeVersion version) {
+		SonarQubeDockerContainer container = SonarQubeDockerContainer.build(version);
+		container.startSonarQubeContainer();
+		SonarQubeClient client = new SonarQubeClient(container.getServerConnectionString(), container.getApiToken());
+		createProjectAndAssertSuccess(client, projectKey);
+		return client;
+
+	}
+
 	/**
 	 * Integration test, executing:
 	 * 
 	 * {@link ComponentsApi#searchProjects(String, int, int)}
 	 */
-	@Test
-	void searchProjects() {
+	@ParameterizedTest
+	@EnumSource(SonarQubeVersion.class)
+	void searchProjects(SonarQubeVersion version) {
+		client = createClient(version);
 		SearchProjectResponse searchResponse = client.componentsApi().searchProjects(projectKey, 1, 1);
 		assertSearchResponse(searchResponse, 200, 1, projectKey);
 	}
@@ -77,8 +84,10 @@ class SonarQubeClientIntegrationTest {
 	 * 
 	 * {@link ComponentsApi#searchProjects(String, int, int)}
 	 */
-	@Test
-	void searchProjects_pageSizeOver1000() {
+	@ParameterizedTest
+	@EnumSource(SonarQubeVersion.class)
+	void searchProjects_pageSizeOver1000(SonarQubeVersion version) {
+		client = createClient(version);
 		SearchProjectResponse searchResponse = client.componentsApi().searchProjects(projectKey, 1001, 1);
 		assertSearchResponse(searchResponse, 200, 1, projectKey);
 	}
@@ -92,8 +101,10 @@ class SonarQubeClientIntegrationTest {
 	 * {@link ComponentsApi#searchProjects(String, int, int)}
 	 * again
 	 */
-	@Test
-	void updateTags() {
+	@ParameterizedTest
+	@EnumSource(SonarQubeVersion.class)
+	void updateTags(SonarQubeVersion version) {
+		client = createClient(version);
 		SearchProjectResponse searchResponse1 = client.componentsApi().searchProjects(projectKey, 1, 1);
 		assertSearchResponse(searchResponse1, 200, 1, projectKey);
 		assertEquals(0, searchResponse1.getComponents().get(0).getTags().size());
@@ -116,8 +127,10 @@ class SonarQubeClientIntegrationTest {
 	 * {@link ComponentsApi#searchProjects(String, int, int)}y
 	 * again
 	 */
-	@Test
-	void updateTags_duplication() {
+	@ParameterizedTest
+	@EnumSource(SonarQubeVersion.class)
+	void updateTags_duplication(SonarQubeVersion version) {
+		client = createClient(version);
 		SonarApiResponse setTagsResponse = client.projectTagsApi().setTags(projectKey, "tag1,tag1,tag1,tag4");
 		assertEquals(204, setTagsResponse.getStatusCode());
 
@@ -136,8 +149,10 @@ class SonarQubeClientIntegrationTest {
 	 * {@link ComponentsApi#searchProjects(String, int, int)}y
 	 * again
 	 */
-	@Test
-	void updateTags_tagTrimming() {
+	@ParameterizedTest
+	@EnumSource(SonarQubeVersion.class)
+	void updateTags_tagTrimming(SonarQubeVersion version) {
+		client = createClient(version);
 		SonarApiResponse setTagsResponse = client.projectTagsApi().setTags(projectKey, "tag1 , tag2 , tag1,tag2");
 		assertEquals(204, setTagsResponse.getStatusCode());
 
@@ -154,8 +169,10 @@ class SonarQubeClientIntegrationTest {
 	 * 
 	 * {@link ComputeEngineApi#getActivities(ActivitiesParameter)}
 	 */
-	@Test
-	void activities_noParams() {
+	@ParameterizedTest
+	@EnumSource(SonarQubeVersion.class)
+	void activities_noParams(SonarQubeVersion version) {
+		client = createClient(version);
 		ActivityResponse response = client.computeEngine().getActivities(ActivitiesParameter.builder().build());
 		assertEquals("Expected status 200, body: " + response.getReturnedBody(), 200, response.getStatusCode());
 	}
@@ -165,8 +182,10 @@ class SonarQubeClientIntegrationTest {
 	 * 
 	 * {@link ComputeEngineApi#getActivities(ActivitiesParameter)}
 	 */
-	@Test
-	void activities_allParamsWithComponent() {
+	@ParameterizedTest
+	@EnumSource(SonarQubeVersion.class)
+	void activities_allParamsWithComponent(SonarQubeVersion version) {
+		client = createClient(version);
 		ZonedDateTime time = ZonedDateTime.ofInstant(LocalDateTime.of(2022, Month.JANUARY, 1, 1, 1, 1, 0), ZoneOffset.UTC, ZoneId.of("Z"));
 
 		ActivityResponse response = client.computeEngine().getActivities(ActivitiesParameter.builder()
@@ -191,8 +210,10 @@ class SonarQubeClientIntegrationTest {
 	 * 
 	 * {@link ComputeEngineApi#getActivities(ActivitiesParameter)}
 	 */
-	@Test
-	void activities_allParamsWithApache() {
+	@ParameterizedTest
+	@EnumSource(SonarQubeVersion.class)
+	void activities_allParamsWithApache(SonarQubeVersion version) {
+		client = createClient(version);
 		ZonedDateTime time = ZonedDateTime.ofInstant(LocalDateTime.of(2022, Month.JANUARY, 1, 1, 1, 1, 0), ZoneOffset.UTC, ZoneId.of("Z"));
 
 		ActivityResponse response = client.computeEngine().getActivities(ActivitiesParameter.builder()
