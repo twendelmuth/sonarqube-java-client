@@ -15,13 +15,26 @@ import com.twendelmuth.sonarqube.api.exception.SonarQubeClientJsonException;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeServerError;
 
 public class SonarQubeDockerContainer {
-	private static GenericContainer<?> sonarQubeServerContainer;
+	private static Map<SonarQubeVersion, SonarQubeDockerContainer> CONTAINER_MAP = new HashMap<>();
 
-	private static String apiToken;
+	private final SonarQubeVersion sonarQubeVersion;
+
+	private GenericContainer<?> sonarQubeServerContainer;
+
+	private String apiToken;
+
+	private SonarQubeDockerContainer(SonarQubeVersion sonarQubeVersion) {
+		super();
+		this.sonarQubeVersion = sonarQubeVersion;
+	}
+
+	public static SonarQubeDockerContainer build(SonarQubeVersion version) {
+		return CONTAINER_MAP.computeIfAbsent(version, (v) -> new SonarQubeDockerContainer(v));
+	}
 
 	public void startSonarQubeContainer() {
 		if (sonarQubeServerContainer == null) {
-			sonarQubeServerContainer = new GenericContainer<>("sonarqube:9.2.4-community")
+			sonarQubeServerContainer = new GenericContainer<>("sonarqube:" + sonarQubeVersion.getDockerTag())
 					.withExposedPorts(9000)
 					.waitingFor(Wait.forLogMessage(".*WebServer is operational.*", 1)
 							.withStartupTimeout(Duration.ofMinutes(2)));
