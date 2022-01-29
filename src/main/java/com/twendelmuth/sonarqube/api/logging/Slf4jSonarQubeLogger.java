@@ -1,9 +1,7 @@
-package com.twendelmuth.sonarqube.api;
+package com.twendelmuth.sonarqube.api.logging;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.twendelmuth.sonarqube.api.logging.SonarQubeLogger;
 
 public class Slf4jSonarQubeLogger implements SonarQubeLogger {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Slf4jSonarQubeLogger.class);
