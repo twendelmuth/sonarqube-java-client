@@ -1,6 +1,7 @@
 package com.twendelmuth.sonarqube.api.ce;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,17 +12,22 @@ import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import com.twendelmuth.sonarqube.api.AbstractApiEndPointTest;
 import com.twendelmuth.sonarqube.api.SonarQubeJsonMapper;
 import com.twendelmuth.sonarqube.api.SonarQubeServer;
 import com.twendelmuth.sonarqube.api.ce.response.ActivityResponse;
 import com.twendelmuth.sonarqube.api.ce.response.Task;
+import com.twendelmuth.sonarqube.api.ce.response.TaskResponse;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeClientJsonException;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeServerError;
 import com.twendelmuth.sonarqube.api.logging.SonarQubeTestLogger;
+import com.twendelmuth.sonarqube.testing.util.UrlTools;
 
 class ComputeEngineApiTest extends AbstractApiEndPointTest<ComputeEngineApi> {
 	@Override
@@ -48,6 +54,8 @@ class ComputeEngineApiTest extends AbstractApiEndPointTest<ComputeEngineApi> {
 		ZonedDateTime executedAt = ZonedDateTime.ofInstant(LocalDateTime.of(2015, Month.AUGUST, 13, 21, 35, 10), zoneOffset, zoneId);
 
 		assertAll(
+				() -> assertEquals("my-org-1", task1.getOrganization()),
+				() -> assertEquals("BU_dO1vsORa8_beWCwsP", task1.getId()),
 				() -> assertEquals("REPORT", task1.getType()),
 				() -> assertEquals("AU-Tpxb--iU5OvuD2FLy", task1.getComponentId()),
 				() -> assertEquals("Project One", task1.getComponentName()),
@@ -95,6 +103,47 @@ class ComputeEngineApiTest extends AbstractApiEndPointTest<ComputeEngineApi> {
 		assertNotNull(response);
 		assertEquals(200, response.getStatusCode());
 		assertEquals(1, getTestLogger().countErrorMessages(), "Expected to have one log warning!");
+	}
+
+	@Test
+	void testTaskResponse() throws Exception {
+		ComputeEngineApi computeEngineApi = buildClassUnderTest(getStringFromResource("task_result.json"));
+		TaskResponse taskResponse = computeEngineApi.getTask("AVAn5RKqYwETbXvgas-I");
+		assertNotNull(taskResponse.getTask());
+
+		ArgumentCaptor<String> endpointParameter = ArgumentCaptor.forClass(String.class);
+		Mockito.verify(getSonarQubeServer()).doGet(endpointParameter.capture());
+		Map<String, String> parameterMap = UrlTools.extractQueryParameterMap(endpointParameter.getValue());
+
+		assertEquals("AVAn5RKqYwETbXvgas-I", parameterMap.get("id"));
+		assertNull(parameterMap.get("additionalFields"));
+	}
+
+	@Test
+	void testTaskResponse_oneParameter() throws Exception {
+		ComputeEngineApi computeEngineApi = buildClassUnderTest(getStringFromResource("task_result.json"));
+		TaskResponse taskResponse = computeEngineApi.getTask("AVAn5RKqYwETbXvgas-I", TaskAdditionalField.STACKTRACE);
+		assertNotNull(taskResponse.getTask());
+
+		ArgumentCaptor<String> endpointParameter = ArgumentCaptor.forClass(String.class);
+		Mockito.verify(getSonarQubeServer()).doGet(endpointParameter.capture());
+		Map<String, String> parameterMap = UrlTools.extractQueryParameterMap(endpointParameter.getValue());
+
+		assertEquals("stacktrace", parameterMap.get("additionalFields"));
+	}
+
+	@Test
+	void testTaskResponse_allParameters() throws Exception {
+		ComputeEngineApi computeEngineApi = buildClassUnderTest(getStringFromResource("task_result.json"));
+		TaskResponse taskResponse = computeEngineApi.getTask("AVAn5RKqYwETbXvgas-I", TaskAdditionalField.STACKTRACE,
+				TaskAdditionalField.SCANNERCONTEXT, TaskAdditionalField.WARNINGS);
+		assertNotNull(taskResponse.getTask());
+
+		ArgumentCaptor<String> endpointParameter = ArgumentCaptor.forClass(String.class);
+		Mockito.verify(getSonarQubeServer()).doGet(endpointParameter.capture());
+		Map<String, String> parameterMap = UrlTools.extractQueryParameterMap(endpointParameter.getValue());
+
+		assertEquals("stacktrace,scannerContext,warnings", parameterMap.get("additionalFields"));
 	}
 
 }

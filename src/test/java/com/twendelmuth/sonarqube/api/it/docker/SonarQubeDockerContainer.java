@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hc.core5.http.HttpRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
@@ -15,6 +17,8 @@ import com.twendelmuth.sonarqube.api.exception.SonarQubeClientJsonException;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeServerError;
 
 public class SonarQubeDockerContainer {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SonarQubeDockerContainer.class);
+
 	private static Map<SonarQubeVersion, SonarQubeDockerContainer> CONTAINER_MAP = new HashMap<>();
 
 	private final SonarQubeVersion sonarQubeVersion;
@@ -40,6 +44,14 @@ public class SonarQubeDockerContainer {
 							.withStartupTimeout(Duration.ofMinutes(2)));
 			sonarQubeServerContainer.start();
 			apiToken = generateServerToken(sonarQubeServerContainer);
+		}
+	}
+
+	public void stopSonarQubeContainer() {
+		if (sonarQubeServerContainer != null) {
+			sonarQubeServerContainer.stop();
+		} else {
+			LOGGER.warn("Tried to stop server that wasn't running, version: {}", sonarQubeVersion.name());
 		}
 	}
 
