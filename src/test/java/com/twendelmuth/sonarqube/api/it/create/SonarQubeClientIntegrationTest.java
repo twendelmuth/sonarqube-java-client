@@ -2,15 +2,18 @@ package com.twendelmuth.sonarqube.api.it.create;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -20,7 +23,9 @@ import com.twendelmuth.sonarqube.api.ce.ActivitiesParameter;
 import com.twendelmuth.sonarqube.api.ce.ActivitiesParameter.ActivitiesStatus;
 import com.twendelmuth.sonarqube.api.ce.ActivitiesParameter.ActivitiesType;
 import com.twendelmuth.sonarqube.api.ce.ComputeEngineApi;
+import com.twendelmuth.sonarqube.api.ce.TaskAdditionalField;
 import com.twendelmuth.sonarqube.api.ce.response.ActivityResponse;
+import com.twendelmuth.sonarqube.api.ce.response.TaskResponse;
 import com.twendelmuth.sonarqube.api.components.ComponentsApi;
 import com.twendelmuth.sonarqube.api.components.response.SearchProjectResponse;
 import com.twendelmuth.sonarqube.api.it.docker.SonarQubeDockerContainer;
@@ -34,6 +39,12 @@ class SonarQubeClientIntegrationTest {
 	private SonarQubeClient client;
 
 	private final String projectKey = "my-project";
+
+	@BeforeAll
+	static void startAllSonarQubeServers() {
+		Arrays.asList(SonarQubeVersion.values()).stream()
+				.forEach(version -> SonarQubeDockerContainer.build(version).startSonarQubeContainer());
+	}
 
 	@AfterEach
 	void teardown() {
@@ -231,6 +242,21 @@ class SonarQubeClientIntegrationTest {
 				.build());
 
 		assertEquals("Expected status 200, body: " + response.getReturnedBody(), 200, response.getStatusCode());
+	}
+
+	/**
+	 * Check that {@link ComputeEngineApi#getTask(String, com.twendelmuth.sonarqube.api.ce.TaskAdditionalField...)} works.
+	 * Will return nothing because we can't trigger tasks on frehsly booted-up SonarQube instances.
+	 * 
+	 */
+	@ParameterizedTest
+	@EnumSource(SonarQubeVersion.class)
+	void getTask(SonarQubeVersion version) {
+		client = createClient(version);
+
+		TaskResponse response = client.computeEngine().getTask("something", TaskAdditionalField.SCANNERCONTEXT, TaskAdditionalField.STACKTRACE,
+				TaskAdditionalField.WARNINGS);
+		assertNull(response.getTask());
 	}
 
 }

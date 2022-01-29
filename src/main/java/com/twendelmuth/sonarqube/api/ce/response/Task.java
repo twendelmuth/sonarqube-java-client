@@ -3,6 +3,8 @@ package com.twendelmuth.sonarqube.api.ce.response;
 import java.time.ZonedDateTime;
 
 public class Task {
+	private String organization;
+
 	private String id;
 
 	private String type;
@@ -171,6 +173,14 @@ public class Task {
 
 	public void setHasScannerContext(boolean hasScannerContext) {
 		this.hasScannerContext = hasScannerContext;
+	}
+
+	public String getOrganization() {
+		return organization;
+	}
+
+	public void setOrganization(String organization) {
+		this.organization = organization;
 	}
 
 }
