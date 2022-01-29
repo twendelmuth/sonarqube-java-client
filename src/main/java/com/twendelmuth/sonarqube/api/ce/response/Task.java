@@ -1,5 +1,7 @@
 package com.twendelmuth.sonarqube.api.ce.response;
 
+import java.time.ZonedDateTime;
+
 public class Task {
 	private String id;
 
@@ -9,15 +11,55 @@ public class Task {
 
 	private String componentKey;
 
+	private String componentName;
+
 	private String componentQualifier;
 
 	private String analysisId;
 
 	private String status;
 
-	private String scannerContext;
+	private String submitterLogin;
 
-	private String submittedAt;
+	private Long executionTimeMs;
+
+	private boolean logs;
+
+	private boolean hasErrorStacktrace;
+
+	private boolean hasScannerContext;
+
+	private ZonedDateTime submittedAt;
+
+	private ZonedDateTime startedAt;
+
+	private ZonedDateTime executedAt;
+
+	public ZonedDateTime getSubmittedAt() {
+		return submittedAt;
+	}
+
+	public void setSubmittedAt(ZonedDateTime submittedAt) {
+		this.submittedAt = submittedAt;
+	}
+
+	public ZonedDateTime getStartedAt() {
+		return startedAt;
+	}
+
+	public void setStartedAt(ZonedDateTime startedAt) {
+		this.startedAt = startedAt;
+	}
+
+	public ZonedDateTime getExecutedAt() {
+		return executedAt;
+	}
+
+	public void setExecutedAt(ZonedDateTime executedAt) {
+		this.executedAt = executedAt;
+	}
+
+	private String scannerContext;
 
 	public String getId() {
 		return id;
@@ -83,11 +125,52 @@ public class Task {
 		this.scannerContext = scannerContext;
 	}
 
-	public String getSubmittedAt() {
-		return submittedAt;
+	public String getComponentName() {
+		return componentName;
 	}
 
-	public void setSubmittedAt(String submittedAt) {
-		this.submittedAt = submittedAt;
+	public void setComponentName(String componentName) {
+		this.componentName = componentName;
 	}
+
+	public String getSubmitterLogin() {
+		return submitterLogin;
+	}
+
+	public void setSubmitterLogin(String submitterLogin) {
+		this.submitterLogin = submitterLogin;
+	}
+
+	public Long getExecutionTimeMs() {
+		return executionTimeMs;
+	}
+
+	public void setExecutionTimeMs(Long executionTimeMs) {
+		this.executionTimeMs = executionTimeMs;
+	}
+
+	public boolean isLogs() {
+		return logs;
+	}
+
+	public void setLogs(boolean logs) {
+		this.logs = logs;
+	}
+
+	public boolean isHasErrorStacktrace() {
+		return hasErrorStacktrace;
+	}
+
+	public void setHasErrorStacktrace(boolean hasErrorStacktrace) {
+		this.hasErrorStacktrace = hasErrorStacktrace;
+	}
+
+	public boolean isHasScannerContext() {
+		return hasScannerContext;
+	}
+
+	public void setHasScannerContext(boolean hasScannerContext) {
+		this.hasScannerContext = hasScannerContext;
+	}
+
 }
