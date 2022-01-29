@@ -73,7 +73,7 @@ public class SonarQubeServerHttpClient implements SonarQubeServer {
 
 			return new SonarApiResponse(response.getCode(), content);
 		} catch (IOException ioe) {
-			return new SonarApiResponse(-1, ioe.getMessage());
+			throw new SonarQubeServerError("IOException while talking to SonarQube server", -1, ioe.getMessage());
 		}
 	}
 
