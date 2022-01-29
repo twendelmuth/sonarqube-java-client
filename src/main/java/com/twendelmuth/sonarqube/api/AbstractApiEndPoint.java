@@ -20,7 +20,7 @@ public abstract class AbstractApiEndPoint {
 
 	private final SonarQubeLogger logger;
 
-	public AbstractApiEndPoint(SonarQubeServer server, SonarQubeJsonMapper jsonMapper, SonarQubeLogger logger) {
+	protected AbstractApiEndPoint(SonarQubeServer server, SonarQubeJsonMapper jsonMapper, SonarQubeLogger logger) {
 		super();
 		if (server == null) {
 			throw new SonarQubeUnexpectedException("Missing SonarQubeServer implementation");
