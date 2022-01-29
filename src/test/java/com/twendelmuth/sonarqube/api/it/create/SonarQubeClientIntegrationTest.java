@@ -10,13 +10,18 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.time.StopWatch;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.twendelmuth.sonarqube.api.SonarQubeClient;
 import com.twendelmuth.sonarqube.api.ce.ActivitiesParameter;
@@ -36,6 +41,8 @@ import com.twendelmuth.sonarqube.api.response.SonarApiResponse;
 @Tag("IntegrationTest")
 class SonarQubeClientIntegrationTest {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(SonarQubeClientIntegrationTest.class);
+
 	private SonarQubeClient client;
 
 	private final String projectKey = "my-project";
@@ -43,7 +50,20 @@ class SonarQubeClientIntegrationTest {
 	@BeforeAll
 	static void startAllSonarQubeServers() {
 		Arrays.asList(SonarQubeVersion.values()).stream()
-				.forEach(version -> SonarQubeDockerContainer.build(version).startSonarQubeContainer());
+				.forEach(version -> {
+					StopWatch bootClock = StopWatch.createStarted();
+					SonarQubeDockerContainer.build(version).startSonarQubeContainer();
+					bootClock.stop();
+					LOGGER.info("Booted up SonarQube Server {} in {} ms", version.name(), bootClock.getTime(TimeUnit.MILLISECONDS));
+				});
+	}
+
+	@AfterAll
+	static void shutDownAllSonarQubeServers() {
+		Arrays.asList(SonarQubeVersion.values()).stream()
+				.forEach(version -> {
+					SonarQubeDockerContainer.build(version).stopSonarQubeContainer();
+				});
 	}
 
 	@AfterEach
