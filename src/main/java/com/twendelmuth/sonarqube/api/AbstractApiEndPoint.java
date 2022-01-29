@@ -8,10 +8,11 @@ import org.apache.commons.lang3.StringUtils;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeClientException;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeClientJsonException;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeServerError;
+import com.twendelmuth.sonarqube.api.exception.SonarQubeUnexpectedException;
 import com.twendelmuth.sonarqube.api.logging.SonarQubeLogger;
 import com.twendelmuth.sonarqube.api.response.SonarApiResponse;
 
-public class AbstractApiEndPoint {
+public abstract class AbstractApiEndPoint {
 
 	private final SonarQubeServer server;
 
@@ -21,6 +22,16 @@ public class AbstractApiEndPoint {
 
 	public AbstractApiEndPoint(SonarQubeServer server, SonarQubeJsonMapper jsonMapper, SonarQubeLogger logger) {
 		super();
+		if (server == null) {
+			throw new SonarQubeUnexpectedException("Missing SonarQubeServer implementation");
+		}
+		if (jsonMapper == null) {
+			throw new SonarQubeUnexpectedException("Missing SonarQubeJsonMapper implementation");
+		}
+		if (logger == null) {
+			throw new SonarQubeUnexpectedException("Missing SonarQubeLogger implementation");
+		}
+
 		this.server = server;
 		this.jsonMapper = jsonMapper;
 		this.logger = logger;
@@ -64,11 +75,7 @@ public class AbstractApiEndPoint {
 				response = jsonMapper.transformStringToObject(originalResponse.getReturnedBody(), responseClass);
 			}
 		} catch (SonarQubeClientJsonException e) {
-			if (getLogger() != null) {
-				getLogger().logError("Issues while parsing json response", e);
-			} else {
-				throw new SonarQubeClientException("Issues while parsing json response - no logger configured", e);
-			}
+			getLogger().logError("Issues while parsing json response", e);
 		}
 
 		if (response == null) {
