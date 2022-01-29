@@ -1,5 +1,7 @@
 package com.twendelmuth.sonarqube.api.response;
 
+import com.twendelmuth.sonarqube.coverage.ExcludeFromJacocoGeneratedReport;
+
 public class SonarApiResponse {
 	private int statusCode = -1;
 
@@ -32,6 +34,7 @@ public class SonarApiResponse {
 	}
 
 	@Override
+	@ExcludeFromJacocoGeneratedReport
 	public String toString() {
 		return "SonarApiResponse [statusCode=" + statusCode + ", returnedBody=" + returnedBody + "]";
 	}

@@ -2,6 +2,7 @@ package com.twendelmuth.sonarqube.api;
 
 import com.twendelmuth.sonarqube.api.ce.ComputeEngineApi;
 import com.twendelmuth.sonarqube.api.components.ComponentsApi;
+import com.twendelmuth.sonarqube.api.logging.Slf4jSonarQubeLogger;
 import com.twendelmuth.sonarqube.api.logging.SonarQubeLogger;
 import com.twendelmuth.sonarqube.api.project.tags.ProjectTagsApi;
 import com.twendelmuth.sonarqube.api.projects.ProjectsApi;
@@ -12,6 +13,17 @@ public class SonarQubeClient {
 
 	private String loginToken;
 
+	/**
+	 * Creates a new SonarQubeClient instance.
+	 * Uses defaults for HTTP implementation, JSONMapper and Logger, see
+	 * {@link #getSonarQubeServer()}
+	 * {@link #getJsonMapper()}
+	 * {@link #getLogger()}
+	 * 
+	 * 
+	 * @param serverUrl Full URL to the SonarQube server including portocol, not ending with '/' - e.g. https://localhost:9000
+	 * @param loginToken Login Token for interacting with the SonarQube server, obtainable under Account -> Security
+	 */
 	public SonarQubeClient(String serverUrl, String loginToken) {
 		while (serverUrl.endsWith("/")) {
 			serverUrl = serverUrl.substring(0, serverUrl.length() - 1);
