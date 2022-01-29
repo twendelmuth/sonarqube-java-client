@@ -20,9 +20,9 @@ public class SonarQubeJacksonMapper implements SonarQubeJsonMapper {
 
 	protected ObjectMapper getObjectMapper() {
 		return JsonMapper.builder()
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+				.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 				.addModule(new JavaTimeModule())
-				.configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, true)
+				.enable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
 				.build();
 	}
 

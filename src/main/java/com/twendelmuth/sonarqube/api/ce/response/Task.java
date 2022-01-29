@@ -25,8 +25,6 @@ public class Task {
 
 	private Long executionTimeMs;
 
-	private boolean logs;
-
 	private boolean hasErrorStacktrace;
 
 	private boolean hasScannerContext;
@@ -149,14 +147,6 @@ public class Task {
 
 	public void setExecutionTimeMs(Long executionTimeMs) {
 		this.executionTimeMs = executionTimeMs;
-	}
-
-	public boolean isLogs() {
-		return logs;
-	}
-
-	public void setLogs(boolean logs) {
-		this.logs = logs;
 	}
 
 	public boolean isHasErrorStacktrace() {

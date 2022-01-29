@@ -1,8 +1,9 @@
 package com.twendelmuth.sonarqube.api.it.create;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -30,6 +31,8 @@ import com.twendelmuth.sonarqube.api.ce.ActivitiesParameter.ActivitiesType;
 import com.twendelmuth.sonarqube.api.ce.ComputeEngineApi;
 import com.twendelmuth.sonarqube.api.ce.TaskAdditionalField;
 import com.twendelmuth.sonarqube.api.ce.response.ActivityResponse;
+import com.twendelmuth.sonarqube.api.ce.response.ActivityStatusResponse;
+import com.twendelmuth.sonarqube.api.ce.response.ComponentResponse;
 import com.twendelmuth.sonarqube.api.ce.response.TaskResponse;
 import com.twendelmuth.sonarqube.api.components.ComponentsApi;
 import com.twendelmuth.sonarqube.api.components.response.SearchProjectResponse;
@@ -84,7 +87,7 @@ class SonarQubeClientIntegrationTest {
 		Assertions.assertAll(
 				() -> assertNotNull(searchResponse),
 				() -> assertEquals(200, searchResponse.getStatusCode()),
-				() -> assertEquals("OriginalBody: " + searchResponse.getReturnedBody(), 1, searchResponse.getPaging().getTotal()),
+				() -> assertEquals(1, searchResponse.getPaging().getTotal(), "OriginalBody: " + searchResponse.getReturnedBody()),
 				() -> assertEquals(projectKey, searchResponse.getComponents().get(0).getKey()));
 	}
 
@@ -205,7 +208,7 @@ class SonarQubeClientIntegrationTest {
 	void activities_noParams(SonarQubeVersion version) {
 		client = createClient(version);
 		ActivityResponse response = client.computeEngine().getActivities(ActivitiesParameter.builder().build());
-		assertEquals("Expected status 200, body: " + response.getReturnedBody(), 200, response.getStatusCode());
+		assertEquals(200, response.getStatusCode(), "Expected status 200, body: " + response.getReturnedBody());
 	}
 
 	/**
@@ -233,7 +236,7 @@ class SonarQubeClientIntegrationTest {
 				.type(ActivitiesType.REPORT)
 				.build());
 
-		assertEquals("Expected status 200, body: " + response.getReturnedBody(), 200, response.getStatusCode());
+		assertEquals(200, response.getStatusCode(), "Expected status 200, body: " + response.getReturnedBody());
 	}
 
 	/**
@@ -261,7 +264,7 @@ class SonarQubeClientIntegrationTest {
 				.type(ActivitiesType.REPORT)
 				.build());
 
-		assertEquals("Expected status 200, body: " + response.getReturnedBody(), 200, response.getStatusCode());
+		assertEquals(200, response.getStatusCode(), "Expected status 200, body: " + response.getReturnedBody());
 	}
 
 	/**
@@ -277,6 +280,55 @@ class SonarQubeClientIntegrationTest {
 		TaskResponse response = client.computeEngine().getTask("something", TaskAdditionalField.SCANNERCONTEXT, TaskAdditionalField.STACKTRACE,
 				TaskAdditionalField.WARNINGS);
 		assertNull(response.getTask());
+	}
+
+	private void assertActivityStatusResponse(ActivityStatusResponse response) {
+		assertAll(
+				() -> assertEquals(0, response.getPending()),
+				() -> assertEquals(0, response.getInProgress()),
+				() -> assertEquals(0, response.getFailing()),
+				() -> assertEquals(0L, response.getPendingTime()));
+	}
+
+	/**
+	 * Check that {@link ComputeEngineApi#getActivityStatus()} returns something.
+	 * Since the server has done nothing at this point, we should get 0 as replies.
+	 */
+	@ParameterizedTest
+	@EnumSource(SonarQubeVersion.class)
+	void getActivityStatus(SonarQubeVersion version) {
+		client = createClient(version);
+
+		ActivityStatusResponse response = client.computeEngine().getActivityStatus();
+		assertActivityStatusResponse(response);
+	}
+
+	/**
+	 * Check that {@link ComputeEngineApi#getActivityStatus(String)} returns something.
+	 * Since the server has done nothing at this point, we should get 0 as replies.
+	 */
+	@ParameterizedTest
+	@EnumSource(SonarQubeVersion.class)
+	void getActivityStatusWithParameter(SonarQubeVersion version) {
+		client = createClient(version);
+		ActivityStatusResponse response = client.computeEngine().getActivityStatus("my-component");
+		assertActivityStatusResponse(response);
+	}
+
+	/**
+	 * Check that {@link ComputeEngineApi#getComponent(String)} call is correct.
+	 * Will not return any data since nothing is on that server.
+	 */
+	@ParameterizedTest
+	@EnumSource(SonarQubeVersion.class)
+	void getComponent(SonarQubeVersion version) {
+		client = createClient(version);
+
+		ComponentResponse response = client.computeEngine().getComponent("component");
+		assertNotNull(response);
+		assertNotNull(response.getQueue());
+		assertNull(response.getCurrent());
+		assertEquals(0, response.getQueue().size());
 	}
 
 }

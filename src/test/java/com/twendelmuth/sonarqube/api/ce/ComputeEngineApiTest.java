@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -22,10 +23,13 @@ import com.twendelmuth.sonarqube.api.AbstractApiEndPointTest;
 import com.twendelmuth.sonarqube.api.SonarQubeJsonMapper;
 import com.twendelmuth.sonarqube.api.SonarQubeServer;
 import com.twendelmuth.sonarqube.api.ce.response.ActivityResponse;
+import com.twendelmuth.sonarqube.api.ce.response.ActivityStatusResponse;
+import com.twendelmuth.sonarqube.api.ce.response.ComponentResponse;
 import com.twendelmuth.sonarqube.api.ce.response.Task;
 import com.twendelmuth.sonarqube.api.ce.response.TaskResponse;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeClientJsonException;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeServerError;
+import com.twendelmuth.sonarqube.api.exception.SonarQubeUnexpectedException;
 import com.twendelmuth.sonarqube.api.logging.SonarQubeTestLogger;
 import com.twendelmuth.sonarqube.testing.util.UrlTools;
 
@@ -64,7 +68,6 @@ class ComputeEngineApiTest extends AbstractApiEndPointTest<ComputeEngineApi> {
 				() -> assertEquals("SUCCESS", task1.getStatus()),
 				() -> assertEquals("john", task1.getSubmitterLogin()),
 				() -> assertEquals(10000L, task1.getExecutionTimeMs()),
-				() -> assertFalse(task1.isLogs()),
 				() -> assertFalse(task1.isHasErrorStacktrace()),
 				() -> assertTrue(task1.isHasScannerContext()),
 				() -> assertEquals(submittedAt, task1.getSubmittedAt()),
@@ -144,6 +147,69 @@ class ComputeEngineApiTest extends AbstractApiEndPointTest<ComputeEngineApi> {
 		Map<String, String> parameterMap = UrlTools.extractQueryParameterMap(endpointParameter.getValue());
 
 		assertEquals("stacktrace,scannerContext,warnings", parameterMap.get("additionalFields"));
+	}
+
+	@Test
+	void testActivityStatus() {
+		ComputeEngineApi computeEngineApi = buildClassUnderTest(getStringFromResource("activity_status.json"));
+		ActivityStatusResponse response = computeEngineApi.getActivityStatus();
+		assertAll(
+				() -> assertEquals(2, response.getPending()),
+				() -> assertEquals(1, response.getInProgress()),
+				() -> assertEquals(5, response.getFailing()),
+				() -> assertEquals(100123L, response.getPendingTime()));
+	}
+
+	@Test
+	void testActivityStatusWithParameter() throws Exception {
+		ComputeEngineApi computeEngineApi = buildClassUnderTest(getStringFromResource("activity_status.json"));
+		computeEngineApi.getActivityStatus("my_project");
+
+		ArgumentCaptor<String> endpointParameter = ArgumentCaptor.forClass(String.class);
+		Mockito.verify(getSonarQubeServer()).doGet(endpointParameter.capture());
+		Map<String, String> parameterMap = UrlTools.extractQueryParameterMap(endpointParameter.getValue());
+
+		assertEquals("my_project", parameterMap.get("component"));
+	}
+
+	private void assertComponentResponse(ComponentResponse response, int queueSize) {
+		assertAll(
+				() -> assertNotNull(response.getQueue()),
+				() -> assertEquals(queueSize, response.getQueue().size()),
+				() -> assertNotNull(response.getCurrent()));
+	}
+
+	@Test
+	void testComponent() {
+		ComputeEngineApi computeEngineApi = buildClassUnderTest(getStringFromResource("component.json"));
+		ComponentResponse response = computeEngineApi.getComponent("my-component");
+		assertComponentResponse(response, 1);
+	}
+
+	@Test
+	void testComponent_multipleQueue() {
+		ComputeEngineApi computeEngineApi = buildClassUnderTest(getStringFromResource("component_multiQueue.json"));
+		ComponentResponse response = computeEngineApi.getComponent("my-component2");
+		assertComponentResponse(response, 2);
+	}
+
+	@Test
+	void testComponent_noQueue() {
+		ComputeEngineApi computeEngineApi = buildClassUnderTest(getStringFromResource("component_noQueue.json"));
+		ComponentResponse response = computeEngineApi.getComponent("my-component3");
+		assertComponentResponse(response, 0);
+	}
+
+	@Test
+	void testComponent_paramNull() {
+		ComputeEngineApi computeEngineApi = buildClassUnderTest(getStringFromResource("component.json"));
+		assertThrows(SonarQubeUnexpectedException.class, () -> computeEngineApi.getComponent(null));
+	}
+
+	@Test
+	void testComponent_paramBlank() {
+		ComputeEngineApi computeEngineApi = buildClassUnderTest(getStringFromResource("component.json"));
+		assertThrows(SonarQubeUnexpectedException.class, () -> computeEngineApi.getComponent(""));
 	}
 
 }
