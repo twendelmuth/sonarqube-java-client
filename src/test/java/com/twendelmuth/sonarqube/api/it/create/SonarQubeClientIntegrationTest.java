@@ -12,6 +12,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -43,6 +44,11 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 	private SonarQubeClient client;
 
 	public final String projectKey = "my-project";
+
+	@BeforeAll
+	static void startServers() {
+		startAllSonarQubeServers();
+	}
 
 	private void assertSearchResponse(SearchProjectResponse searchResponse, int statusCode, int totalResults, String projectKey) {
 		Assertions.assertAll(

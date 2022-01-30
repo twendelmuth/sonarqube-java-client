@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 
@@ -33,6 +34,11 @@ class ApplicationApiIntegrationTest extends AbstractSonarQubeIntegrationTest {
 		assertTrue(response.isSuccess());
 		cleanUpList.add(() -> client.applicationsApi().deleteApplication(MY_APP));
 		return response;
+	}
+
+	@BeforeAll
+	static void startServers() {
+		startAllSonarQubeServers();
 	}
 
 	@ParameterizedTest
