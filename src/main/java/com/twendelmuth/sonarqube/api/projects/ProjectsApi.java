@@ -1,9 +1,9 @@
 package com.twendelmuth.sonarqube.api.projects;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import com.twendelmuth.sonarqube.api.AbstractApiEndPoint;
+import com.twendelmuth.sonarqube.api.NameValuePair;
 import com.twendelmuth.sonarqube.api.SonarQubeJsonMapper;
 import com.twendelmuth.sonarqube.api.SonarQubeServer;
 import com.twendelmuth.sonarqube.api.logging.SonarQubeLogger;
@@ -25,13 +25,10 @@ public class ProjectsApi extends AbstractApiEndPoint {
 	 * @param project Key of the project
 	 * @return If the operation was successful
 	 */
-	public boolean create(String name, String project) {
-		Map<String, String> parameters = new HashMap<>();
-		parameters.put("name", name);
-		parameters.put("project", project);
+	public SonarApiResponse create(String name, String project) {
+		List<NameValuePair> parameters = NameValuePair.listOf("name", name, "project", project);
 
-		SonarApiResponse response = doPostWithErrorHandling(CREATE, parameters, SonarApiResponse.class);
-		return response.getStatusCode() >= 200 && response.getStatusCode() < 300;
+		return doPostWithErrorHandling(CREATE, parameters, SonarApiResponse.class);
 	}
 
 	/**
@@ -39,12 +36,9 @@ public class ProjectsApi extends AbstractApiEndPoint {
 	 * Requires 'Administer System' permission or 'Administer' permission on the project.
 	 * @return If the operation was successful
 	 */
-	public boolean delete(String projectKey) {
-		Map<String, String> parameters = new HashMap<>();
-		parameters.put("project", projectKey);
-
-		SonarApiResponse response = doPostWithErrorHandling(DELETE, parameters, SonarApiResponse.class);
-		return response.getStatusCode() >= 200 && response.getStatusCode() < 300;
+	public SonarApiResponse delete(String projectKey) {
+		List<NameValuePair> parameters = NameValuePair.listOf("project", projectKey);
+		return doPostWithErrorHandling(DELETE, parameters, SonarApiResponse.class);
 	}
 
 }

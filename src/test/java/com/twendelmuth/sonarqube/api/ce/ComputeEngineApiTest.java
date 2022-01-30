@@ -27,9 +27,9 @@ import com.twendelmuth.sonarqube.api.ce.response.ActivityStatusResponse;
 import com.twendelmuth.sonarqube.api.ce.response.ComponentResponse;
 import com.twendelmuth.sonarqube.api.ce.response.Task;
 import com.twendelmuth.sonarqube.api.ce.response.TaskResponse;
-import com.twendelmuth.sonarqube.api.exception.SonarQubeClientJsonException;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeServerError;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeUnexpectedException;
+import com.twendelmuth.sonarqube.api.exception.TestSonarQubeClientJsonException;
 import com.twendelmuth.sonarqube.api.logging.SonarQubeTestLogger;
 import com.twendelmuth.sonarqube.testing.util.UrlTools;
 
@@ -90,6 +90,7 @@ class ComputeEngineApiTest extends AbstractApiEndPointTest<ComputeEngineApi> {
 	@Test
 	void testActivityResult_notAuthed() {
 		ComputeEngineApi computeEngineApi = buildClassUnderTest(new SonarQubeServerError("Forbidden", 403, "Please provide API Token!"));
+		getTestLogger().turnOffExceptionLogging();
 
 		ActivityResponse response = computeEngineApi.getActivities(ActivitiesParameter.builder().build());
 		assertNotNull(response);
@@ -100,7 +101,8 @@ class ComputeEngineApiTest extends AbstractApiEndPointTest<ComputeEngineApi> {
 	@Test
 	void testActivityResult_jsonIssues() {
 		ComputeEngineApi computeEngineApi = buildClassUnderTest(getStringFromResource("activity_result.json"),
-				new SonarQubeClientJsonException("Something happened", null));
+				TestSonarQubeClientJsonException.get());
+		getTestLogger().turnOffExceptionLogging();
 
 		ActivityResponse response = computeEngineApi.getActivities(ActivitiesParameter.builder().build());
 		assertNotNull(response);

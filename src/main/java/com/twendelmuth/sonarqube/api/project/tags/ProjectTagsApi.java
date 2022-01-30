@@ -1,10 +1,9 @@
 package com.twendelmuth.sonarqube.api.project.tags;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.twendelmuth.sonarqube.api.AbstractApiEndPoint;
+import com.twendelmuth.sonarqube.api.NameValuePair;
 import com.twendelmuth.sonarqube.api.SonarQubeJsonMapper;
 import com.twendelmuth.sonarqube.api.SonarQubeServer;
 import com.twendelmuth.sonarqube.api.logging.SonarQubeLogger;
@@ -45,10 +44,7 @@ public class ProjectTagsApi extends AbstractApiEndPoint {
 	 * @param tags comma separated set of tags.
 	 */
 	public SonarApiResponse setTags(String projectKey, String tags) {
-		Map<String, String> parameters = new HashMap<>();
-		parameters.put("project", projectKey);
-		parameters.put("tags", tags);
-
+		List<NameValuePair> parameters = NameValuePair.listOf("project", projectKey, "tags", tags);
 		return doPostWithErrorHandling(SET_TAGS, parameters, SonarApiResponse.class);
 	}
 

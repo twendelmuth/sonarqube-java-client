@@ -15,8 +15,8 @@ import com.twendelmuth.sonarqube.api.AbstractApiEndPointTest;
 import com.twendelmuth.sonarqube.api.SonarQubeJsonMapper;
 import com.twendelmuth.sonarqube.api.SonarQubeServer;
 import com.twendelmuth.sonarqube.api.components.response.SearchProjectResponse;
-import com.twendelmuth.sonarqube.api.exception.SonarQubeClientJsonException;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeServerError;
+import com.twendelmuth.sonarqube.api.exception.TestSonarQubeClientJsonException;
 import com.twendelmuth.sonarqube.api.logging.SonarQubeTestLogger;
 import com.twendelmuth.sonarqube.api.response.Component;
 import com.twendelmuth.sonarqube.testing.util.UrlTools;
@@ -43,7 +43,7 @@ class ComponentsApiTest extends AbstractApiEndPointTest<ComponentsApi> {
 
 	@Test
 	void testServerException() {
-		ComponentsApi componentsApi = buildClassUnderTest(new SonarQubeServerError("Error", 403, "some body"));
+		ComponentsApi componentsApi = buildClassUnderTest(new SonarQubeServerError("Error", 403, "{}"));
 
 		SearchProjectResponse response = componentsApi.searchProjects("something", 100, 1);
 		assertNotNull(response);
@@ -53,7 +53,7 @@ class ComponentsApiTest extends AbstractApiEndPointTest<ComponentsApi> {
 	@Test
 	void testSearchProjects_jsonIssues() {
 		ComponentsApi componentsApi = buildClassUnderTest(getStringFromResource("search_projects.json"),
-				new SonarQubeClientJsonException("Something happened", null));
+				TestSonarQubeClientJsonException.get());
 
 		SearchProjectResponse response = componentsApi.searchProjects("something", 100, 1);
 		assertNotNull(response);

@@ -1,6 +1,6 @@
 package com.twendelmuth.sonarqube.api;
 
-import java.util.Map;
+import java.util.List;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
@@ -55,7 +55,7 @@ public abstract class AbstractApiEndPoint {
 		}, responseClass);
 	}
 
-	protected <T extends SonarApiResponse> T doPostWithErrorHandling(String endpoint, Map<String, String> parameters, Class<T> responseClass) {
+	protected <T extends SonarApiResponse> T doPostWithErrorHandling(String endpoint, List<NameValuePair> parameters, Class<T> responseClass) {
 
 		return handleHTTPConnection(httpCall -> {
 			try {

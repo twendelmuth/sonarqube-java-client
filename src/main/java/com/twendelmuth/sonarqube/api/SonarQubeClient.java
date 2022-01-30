@@ -1,5 +1,6 @@
 package com.twendelmuth.sonarqube.api;
 
+import com.twendelmuth.sonarqube.api.applications.ApplicationsApi;
 import com.twendelmuth.sonarqube.api.ce.ComputeEngineApi;
 import com.twendelmuth.sonarqube.api.components.ComponentsApi;
 import com.twendelmuth.sonarqube.api.logging.Slf4jSonarQubeLogger;
@@ -46,6 +47,10 @@ public class SonarQubeClient {
 
 	public ProjectTagsApi projectTagsApi() {
 		return new ProjectTagsApi(getSonarQubeServer(), getJsonMapper(), getLogger());
+	}
+
+	public ApplicationsApi applicationsApi() {
+		return new ApplicationsApi(getSonarQubeServer(), getJsonMapper(), getLogger());
 	}
 
 	public SonarQubeServer getSonarQubeServer() {
