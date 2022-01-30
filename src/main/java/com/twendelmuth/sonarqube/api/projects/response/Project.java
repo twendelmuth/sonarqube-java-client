@@ -1,7 +1,5 @@
 package com.twendelmuth.sonarqube.api.projects.response;
 
-import com.twendelmuth.sonarqube.api.projects.ProjectVisibility;
-
 public class Project {
 	private String key;
 
@@ -9,7 +7,7 @@ public class Project {
 
 	private String qualifier;
 
-	private ProjectVisibility visibility;
+	private String visibility;
 
 	public String getKey() {
 		return key;
@@ -35,11 +33,12 @@ public class Project {
 		this.qualifier = qualifier;
 	}
 
-	public ProjectVisibility getVisibility() {
+	public String getVisibility() {
 		return visibility;
 	}
 
-	public void setVisibility(ProjectVisibility visibility) {
+	public void setVisibility(String visibility) {
 		this.visibility = visibility;
 	}
+
 }

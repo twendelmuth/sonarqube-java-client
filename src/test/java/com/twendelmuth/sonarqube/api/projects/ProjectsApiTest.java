@@ -38,7 +38,8 @@ public class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
 				() -> assertNotNull(project),
 				() -> assertEquals("project-key", project.getKey()),
 				() -> assertEquals("project-name", project.getName()),
-				() -> assertEquals("TRK", project.getQualifier()));
+				() -> assertEquals("TRK", project.getQualifier()),
+				() -> assertEquals("public", project.getVisibility()));
 
 	}
 
