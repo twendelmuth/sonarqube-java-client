@@ -45,7 +45,7 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 
 	private SonarQubeClient client;
 
-	public final String projectKey = "my-project";
+	public final String projectKey = "project-key";
 
 	private void assertSearchResponse(SearchProjectResponse searchResponse, int statusCode, int totalResults, String projectKey) {
 		Assertions.assertAll(
@@ -60,7 +60,7 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 	@SonarQubeVersionEnum
 	void createProject(SonarQubeVersion version) {
 		client = createClient(version);
-		SonarApiResponse response = createProject(client, projectKey);
+		SonarApiResponse response = createProject(client, projectKey, "project-name");
 		assertJsonIsTheSame(ProjectsApiTest.getCreateProjectJson(), response.getReturnedBody());
 	}
 

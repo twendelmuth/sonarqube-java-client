@@ -50,7 +50,11 @@ public abstract class AbstractSonarQubeIntegrationTest {
 	}
 
 	protected SonarApiResponse createProject(SonarQubeClient client, String key) {
-		SonarApiResponse response = client.projectsApi().create(key, key);
+		return createProject(client, key, key);
+	}
+
+	protected SonarApiResponse createProject(SonarQubeClient client, String key, String name) {
+		SonarApiResponse response = client.projectsApi().create(name, key);
 		cleanUpList.add(() -> deleteProject(client, key));
 		return response;
 	}
