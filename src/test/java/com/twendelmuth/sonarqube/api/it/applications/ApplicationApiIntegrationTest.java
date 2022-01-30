@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twendelmuth.sonarqube.api.SonarQubeClient;
 import com.twendelmuth.sonarqube.api.SonarQubeLicense;
 import com.twendelmuth.sonarqube.api.SonarQubeVersionEnum;
@@ -50,10 +49,7 @@ class ApplicationApiIntegrationTest extends AbstractSonarQubeIntegrationTest {
 		assertTrue(response.getErrors().isEmpty());
 
 		String returnBody = response.getReturnedBody();
-		//make sure our normal test assumptions are correct.
-		ObjectMapper objectMapper = new ObjectMapper();
-		assertEquals(objectMapper.readTree(ApplicationsApiTest.getCreateApplicationResponse()), objectMapper.readTree(returnBody),
-				POTENTIAL_WRONG_UNIT_TEST_ASSUMPTIONS);
+		assertJsonIsTheSame(ApplicationsApiTest.getCreateApplicationResponse(), returnBody);
 	}
 
 	@ParameterizedTest

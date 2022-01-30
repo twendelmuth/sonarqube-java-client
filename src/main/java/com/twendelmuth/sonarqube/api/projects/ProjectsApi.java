@@ -7,6 +7,7 @@ import com.twendelmuth.sonarqube.api.NameValuePair;
 import com.twendelmuth.sonarqube.api.SonarQubeJsonMapper;
 import com.twendelmuth.sonarqube.api.SonarQubeServer;
 import com.twendelmuth.sonarqube.api.logging.SonarQubeLogger;
+import com.twendelmuth.sonarqube.api.projects.response.ProjectResponse;
 import com.twendelmuth.sonarqube.api.response.SonarApiResponse;
 
 public class ProjectsApi extends AbstractApiEndPoint {
@@ -25,10 +26,10 @@ public class ProjectsApi extends AbstractApiEndPoint {
 	 * @param project Key of the project
 	 * @return If the operation was successful
 	 */
-	public SonarApiResponse create(String name, String project) {
+	public ProjectResponse create(String name, String project) {
 		List<NameValuePair> parameters = NameValuePair.listOf("name", name, "project", project);
 
-		return doPostWithErrorHandling(CREATE, parameters, SonarApiResponse.class);
+		return doPostWithErrorHandling(CREATE, parameters, ProjectResponse.class);
 	}
 
 	/**

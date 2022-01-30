@@ -16,11 +16,11 @@ import java.time.ZonedDateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.twendelmuth.sonarqube.api.SonarQubeClient;
+import com.twendelmuth.sonarqube.api.SonarQubeVersionEnum;
 import com.twendelmuth.sonarqube.api.ce.ActivitiesParameter;
 import com.twendelmuth.sonarqube.api.ce.ActivitiesParameter.ActivitiesStatus;
 import com.twendelmuth.sonarqube.api.ce.ActivitiesParameter.ActivitiesType;
@@ -35,6 +35,7 @@ import com.twendelmuth.sonarqube.api.components.response.SearchProjectResponse;
 import com.twendelmuth.sonarqube.api.it.AbstractSonarQubeIntegrationTest;
 import com.twendelmuth.sonarqube.api.it.docker.SonarQubeVersion;
 import com.twendelmuth.sonarqube.api.project.tags.ProjectTagsApi;
+import com.twendelmuth.sonarqube.api.projects.ProjectsApiTest;
 import com.twendelmuth.sonarqube.api.response.SonarApiResponse;
 
 @Tag("IntegrationTest")
@@ -55,13 +56,21 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 				() -> assertEquals(projectKey, searchResponse.getComponents().get(0).getKey()));
 	}
 
+	@ParameterizedTest
+	@SonarQubeVersionEnum
+	void createProject(SonarQubeVersion version) {
+		client = createClient(version);
+		SonarApiResponse response = createProject(client, projectKey);
+		assertJsonIsTheSame(ProjectsApiTest.getCreateProjectJson(), response.getReturnedBody());
+	}
+
 	/**
 	 * Integration test, executing:
 	 * 
 	 * {@link ComponentsApi#searchProjects(String, int, int)}
 	 */
 	@ParameterizedTest
-	@EnumSource(SonarQubeVersion.class)
+	@SonarQubeVersionEnum
 	void searchProjects(SonarQubeVersion version) {
 		client = createClient(version);
 		createProject(client, projectKey);
@@ -75,7 +84,7 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 	 * {@link ComponentsApi#searchProjects(String, int, int)}
 	 */
 	@ParameterizedTest
-	@EnumSource(SonarQubeVersion.class)
+	@SonarQubeVersionEnum
 	void searchProjects_pageSizeOver1000(SonarQubeVersion version) {
 		client = createClient(version);
 		createProject(client, projectKey);
@@ -93,7 +102,7 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 	 * again
 	 */
 	@ParameterizedTest
-	@EnumSource(SonarQubeVersion.class)
+	@SonarQubeVersionEnum
 	void updateTags(SonarQubeVersion version) {
 		client = createClient(version);
 		createProject(client, projectKey);
@@ -120,7 +129,7 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 	 * again
 	 */
 	@ParameterizedTest
-	@EnumSource(SonarQubeVersion.class)
+	@SonarQubeVersionEnum
 	void updateTags_duplication(SonarQubeVersion version) {
 		client = createClient(version);
 		createProject(client, projectKey);
@@ -143,7 +152,7 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 	 * again
 	 */
 	@ParameterizedTest
-	@EnumSource(SonarQubeVersion.class)
+	@SonarQubeVersionEnum
 	void updateTags_tagTrimming(SonarQubeVersion version) {
 		client = createClient(version);
 		createProject(client, projectKey);
@@ -164,7 +173,7 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 	 * {@link ComputeEngineApi#getActivities(ActivitiesParameter)}
 	 */
 	@ParameterizedTest
-	@EnumSource(SonarQubeVersion.class)
+	@SonarQubeVersionEnum
 	void activities_noParams(SonarQubeVersion version) {
 		client = createClient(version);
 		createProject(client, projectKey);
@@ -178,7 +187,7 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 	 * {@link ComputeEngineApi#getActivities(ActivitiesParameter)}
 	 */
 	@ParameterizedTest
-	@EnumSource(SonarQubeVersion.class)
+	@SonarQubeVersionEnum
 	void activities_allParamsWithComponent(SonarQubeVersion version) {
 		client = createClient(version);
 		createProject(client, projectKey);
@@ -207,7 +216,7 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 	 * {@link ComputeEngineApi#getActivities(ActivitiesParameter)}
 	 */
 	@ParameterizedTest
-	@EnumSource(SonarQubeVersion.class)
+	@SonarQubeVersionEnum
 	void activities_allParamsWithApache(SonarQubeVersion version) {
 		client = createClient(version);
 		createProject(client, projectKey);
@@ -236,7 +245,7 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 	 * 
 	 */
 	@ParameterizedTest
-	@EnumSource(SonarQubeVersion.class)
+	@SonarQubeVersionEnum
 	void getTask(SonarQubeVersion version) {
 		client = createClient(version);
 		createProject(client, projectKey);
@@ -259,7 +268,7 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 	 * Since the server has done nothing at this point, we should get 0 as replies.
 	 */
 	@ParameterizedTest
-	@EnumSource(SonarQubeVersion.class)
+	@SonarQubeVersionEnum
 	void getActivityStatus(SonarQubeVersion version) {
 		client = createClient(version);
 		createProject(client, projectKey);
@@ -273,7 +282,7 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 	 * Since the server has done nothing at this point, we should get 0 as replies.
 	 */
 	@ParameterizedTest
-	@EnumSource(SonarQubeVersion.class)
+	@SonarQubeVersionEnum
 	void getActivityStatusWithParameter(SonarQubeVersion version) {
 		client = createClient(version);
 		createProject(client, projectKey);
@@ -287,7 +296,7 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 	 * Will not return any data since nothing is on that server.
 	 */
 	@ParameterizedTest
-	@EnumSource(SonarQubeVersion.class)
+	@SonarQubeVersionEnum
 	void getComponent(SonarQubeVersion version) {
 		client = createClient(version);
 		createProject(client, projectKey);
@@ -306,7 +315,7 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 	 * Will not return any data since nothing is on that server.
 	 */
 	@ParameterizedTest
-	@EnumSource(SonarQubeVersion.class)
+	@SonarQubeVersionEnum
 	void getComponent_errorState(SonarQubeVersion version) {
 		client = createClient(version);
 

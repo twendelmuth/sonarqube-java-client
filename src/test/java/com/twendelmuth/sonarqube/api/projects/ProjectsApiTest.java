@@ -2,26 +2,44 @@ package com.twendelmuth.sonarqube.api.projects;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
 import com.twendelmuth.sonarqube.api.AbstractApiEndPointTest;
+import com.twendelmuth.sonarqube.api.IOHelper;
 import com.twendelmuth.sonarqube.api.SonarQubeJsonMapper;
 import com.twendelmuth.sonarqube.api.SonarQubeServer;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeServerError;
 import com.twendelmuth.sonarqube.api.logging.SonarQubeTestLogger;
+import com.twendelmuth.sonarqube.api.projects.response.Project;
+import com.twendelmuth.sonarqube.api.projects.response.ProjectResponse;
 
-class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
+public class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
 
 	@Override
 	protected ProjectsApi buildTestUnderTest(SonarQubeServer sonarQubeServer, SonarQubeJsonMapper jsonMapper, SonarQubeTestLogger testLogger) {
 		return new ProjectsApi(sonarQubeServer, jsonMapper, testLogger);
 	}
 
+	public static String getCreateProjectJson() {
+		return IOHelper.getStringFromResource(ProjectsApiTest.class, "createProject.json");
+	}
+
 	@Test
 	void createProject() {
-		ProjectsApi projectsApi = buildClassUnderTest(204, getStringFromResource("createProject.json"));
-		assertTrue(projectsApi.create("project", "project").isSuccess());
+		ProjectsApi projectsApi = buildClassUnderTest(204, getCreateProjectJson());
+		ProjectResponse response = projectsApi.create("project-name", "project-key");
+		assertTrue(response.isSuccess());
+		Project project = response.getProject();
+		assertAll(
+				() -> assertNotNull(project),
+				() -> assertEquals("project-key", project.getKey()),
+				() -> assertEquals("project-name", project.getName()),
+				() -> assertEquals("TRK", project.getQualifier()));
+
 	}
 
 	@Test
