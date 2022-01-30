@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 
@@ -36,11 +35,6 @@ class ApplicationApiIntegrationTest extends AbstractSonarQubeIntegrationTest {
 		return response;
 	}
 
-	@BeforeAll
-	static void startServers() {
-		startAllSonarQubeServers();
-	}
-
 	@ParameterizedTest
 	@SonarQubeVersionEnum(license = SonarQubeLicense.DEVELOPER)
 	void createApplicationTest(SonarQubeVersion version) throws Exception {
@@ -49,6 +43,7 @@ class ApplicationApiIntegrationTest extends AbstractSonarQubeIntegrationTest {
 
 		Application returnedApplication = response.getApplication();
 		assertAll("Couldn't assert application, returnBody: " + response.getReturnedBody() + ", status: " + response.getStatusCode(),
+				() -> assertTrue(response.isSuccess()),
 				() -> assertEquals("My app", returnedApplication.getName()),
 				() -> assertEquals("My Application", returnedApplication.getDescription()),
 				() -> assertEquals(MY_APP, returnedApplication.getKey()));

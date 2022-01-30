@@ -10,7 +10,7 @@ public class SonarApiResponse {
 
 	private String returnedBody;
 
-	private final List<String> errors = new ArrayList<>();
+	private final List<Error> errors = new ArrayList<>();
 
 	public SonarApiResponse() {
 
@@ -48,7 +48,7 @@ public class SonarApiResponse {
 		return "SonarApiResponse [statusCode=" + statusCode + ", returnedBody=" + returnedBody + "]";
 	}
 
-	public List<String> getErrors() {
+	public List<Error> getErrors() {
 		return errors;
 	}
 

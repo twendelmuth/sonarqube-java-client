@@ -19,6 +19,22 @@ import com.twendelmuth.sonarqube.api.response.SonarApiResponse;
  *
  */
 public class ApplicationsApi extends AbstractApiEndPoint {
+	private static final String PROJECT_BRANCH_PARAMETER = "projectBranch";
+
+	private static final String BRANCH_PARAMETER = "branch";
+
+	private static final String VISIBILITY_PARAMETER = "visibility";
+
+	private static final String KEY_PARAMETER = "key";
+
+	private static final String DESCRIPTION_PARAMETER = "description";
+
+	private static final String NAME_PARAMETER = "name";
+
+	private static final String PROJECT_PARAMETER = "project";
+
+	private static final String APPLICATION_PARAMETER = "application";
+
 	private static final String ADD_APPLICATION = "/api/applications/create";
 
 	private static final String ADD_PROJECT = "/api/applications/add_project";
@@ -29,6 +45,24 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 		super(server, jsonMapper, logger);
 	}
 
+	private void assertProjectParameter(String project) {
+		if (StringUtils.isEmpty(project)) {
+			throw new SonarQubeUnexpectedException("Project cannot be empty");
+		}
+	}
+
+	private void assertApplicationParameter(String application) {
+		if (StringUtils.isEmpty(application)) {
+			throw new SonarQubeUnexpectedException("Application cannot be empty");
+		}
+	}
+
+	private void assertNameParameter(String name) {
+		if (StringUtils.isBlank(name)) {
+			throw new SonarQubeUnexpectedException("Name cannot be empty");
+		}
+	}
+
 	/**
 	 * Add a project to an application.
 	 * Requires 'Administrator' permission on the application
@@ -37,15 +71,11 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	 * @return If call was successful
 	 */
 	public SonarApiResponse addProject(String application, String project) {
-		if (StringUtils.isEmpty(application)) {
-			throw new SonarQubeUnexpectedException("Application cannot be empty");
-		}
+		assertApplicationParameter(application);
 
-		if (StringUtils.isEmpty(project)) {
-			throw new SonarQubeUnexpectedException("Project cannot be empty");
-		}
+		assertProjectParameter(project);
 
-		List<NameValuePair> parameters = NameValuePair.listOf("application", application, "project", project);
+		List<NameValuePair> parameters = NameValuePair.listOf(APPLICATION_PARAMETER, application, PROJECT_PARAMETER, project);
 
 		return doPostWithErrorHandling(ADD_PROJECT, parameters, SonarApiResponse.class);
 	}
@@ -59,20 +89,18 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	 * @param visibility Whether the created application should be visible to everyone, or only specific user/groups. If no visibility is specified, the default visibility will be used. <strong>(optional)</strong>
 	 */
 	public ApplicationResponse createApplication(String name, String description, String key, ApplicationVisibility visibility) {
-		if (StringUtils.isBlank(name)) {
-			throw new SonarQubeUnexpectedException("Name cannot be empty");
-		}
+		assertNameParameter(name);
 
 		List<NameValuePair> parameters = new ArrayList<>();
-		parameters.add(new NameValuePair("name", name));
+		parameters.add(new NameValuePair(NAME_PARAMETER, name));
 		if (StringUtils.isNotBlank(description)) {
-			parameters.add(new NameValuePair("description", description));
+			parameters.add(new NameValuePair(DESCRIPTION_PARAMETER, description));
 		}
 		if (StringUtils.isNotBlank(key)) {
-			parameters.add(new NameValuePair("key", key));
+			parameters.add(new NameValuePair(KEY_PARAMETER, key));
 		}
 		if (visibility != null) {
-			parameters.add(new NameValuePair("visibility", visibility.getApiName()));
+			parameters.add(new NameValuePair(VISIBILITY_PARAMETER, visibility.getApiName()));
 		}
 
 		return doPostWithErrorHandling(ADD_APPLICATION, parameters, ApplicationResponse.class);
@@ -87,9 +115,7 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	 * @return
 	 */
 	public SonarApiResponse createBranch(String application, String branch, ApplicationProjectsParameter applicationProjectsParameter) {
-		if (StringUtils.isEmpty(application)) {
-			throw new SonarQubeUnexpectedException("Application cannot be empty");
-		}
+		assertApplicationParameter(application);
 		if (applicationProjectsParameter == null) {
 			throw new SonarQubeUnexpectedException("applicationProjectsParameter is required");
 		}
@@ -98,16 +124,16 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 		}
 
 		List<NameValuePair> parameters = new ArrayList<>();
-		parameters.add(new NameValuePair("application", application));
+		parameters.add(new NameValuePair(APPLICATION_PARAMETER, application));
 		if (StringUtils.isNotBlank(branch)) {
-			parameters.add(new NameValuePair("branch", StringUtils.left(branch, 255)));
+			parameters.add(new NameValuePair(BRANCH_PARAMETER, StringUtils.left(branch, 255)));
 		}
 
 		applicationProjectsParameter.getProjectsList().stream()
-				.forEach(project -> parameters.add(new NameValuePair("project", project)));
+				.forEach(project -> parameters.add(new NameValuePair(PROJECT_PARAMETER, project)));
 
 		applicationProjectsParameter.getProjectBranchesList().stream()
-				.forEach(projectBranch -> parameters.add(new NameValuePair("projectBranch", projectBranch)));
+				.forEach(projectBranch -> parameters.add(new NameValuePair(PROJECT_BRANCH_PARAMETER, projectBranch)));
 
 		return doPostWithErrorHandling(ADD_PROJECT, parameters, SonarApiResponse.class);
 	}
@@ -123,7 +149,7 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 			throw new SonarQubeUnexpectedException("Application cannot be empty");
 		}
 
-		List<NameValuePair> parameters = NameValuePair.listOf("application", application);
+		List<NameValuePair> parameters = NameValuePair.listOf(APPLICATION_PARAMETER, application);
 		return doPostWithErrorHandling(DELETE_APPLICATION, parameters, SonarApiResponse.class);
 	}
 

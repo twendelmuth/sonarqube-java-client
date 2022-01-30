@@ -11,8 +11,8 @@ public enum SonarQubeVersion {
 	//	V8_9_LATEST("8.9-community", SonarQubeLicense.COMMUNITY),
 	//	V8_9_LTS_DEVELOPER("8.9-developer", SonarQubeLicense.DEVELOPER),
 	//	V8_9_LTS_ENTERPRISE("8.9-enterprise", SonarQubeLicense.ENTERPRISE),
-	V9_LATEST("9-community", SonarQubeLicense.COMMUNITY),
-	V9_LATEST_DEVELOPER("9-developer", SonarQubeLicense.DEVELOPER),
+	//	V9_LATEST("9-community", SonarQubeLicense.COMMUNITY),
+	//	V9_LATEST_DEVELOPER("9-developer", SonarQubeLicense.DEVELOPER),
 	V9_LATEST_ENTERPRISE("9-enterprise", SonarQubeLicense.ENTERPRISE);
 
 	private final String dockerTag;

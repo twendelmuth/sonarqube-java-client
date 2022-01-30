@@ -3,7 +3,9 @@ package com.twendelmuth.sonarqube.api.it.create;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -12,7 +14,6 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -45,16 +46,12 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 
 	public final String projectKey = "my-project";
 
-	@BeforeAll
-	static void startServers() {
-		startAllSonarQubeServers();
-	}
-
 	private void assertSearchResponse(SearchProjectResponse searchResponse, int statusCode, int totalResults, String projectKey) {
 		Assertions.assertAll(
+				() -> assertTrue(searchResponse.isSuccess(), buildResponseInformation("Call wasn't successful", searchResponse)),
 				() -> assertNotNull(searchResponse),
-				() -> assertEquals(200, searchResponse.getStatusCode()),
-				() -> assertEquals(1, searchResponse.getPaging().getTotal(), "OriginalBody: " + searchResponse.getReturnedBody()),
+				() -> assertEquals(statusCode, searchResponse.getStatusCode()),
+				() -> assertEquals(totalResults, searchResponse.getPaging().getTotal(), "OriginalBody: " + searchResponse.getReturnedBody()),
 				() -> assertEquals(projectKey, searchResponse.getComponents().get(0).getKey()));
 	}
 
@@ -295,11 +292,28 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 		client = createClient(version);
 		createProject(client, projectKey);
 
-		ComponentResponse response = client.computeEngine().getComponent("component");
+		ComponentResponse response = client.computeEngine().getComponent(projectKey);
+		assertTrue(response.isSuccess(), buildResponseInformation("Call wasn't successful", response));
 		assertNotNull(response);
 		assertNotNull(response.getQueue());
 		assertNull(response.getCurrent());
 		assertEquals(0, response.getQueue().size());
+		assertEquals(0, response.getErrors().size());
+	}
+
+	/**
+	 * Check that {@link ComputeEngineApi#getComponent(String)} call is correct.
+	 * Will not return any data since nothing is on that server.
+	 */
+	@ParameterizedTest
+	@EnumSource(SonarQubeVersion.class)
+	void getComponent_errorState(SonarQubeVersion version) {
+		client = createClient(version);
+
+		ComponentResponse response = client.computeEngine().getComponent("Does-not-exist");
+		assertFalse(response.isSuccess(), buildResponseInformation("Call wasn't successful", response));
+		assertNotNull(response);
+		assertEquals(1, response.getErrors().size());
 	}
 
 }
