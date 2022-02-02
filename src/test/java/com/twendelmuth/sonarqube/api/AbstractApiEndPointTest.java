@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentCaptor;
@@ -105,6 +106,13 @@ public abstract class AbstractApiEndPointTest<T extends AbstractApiEndPoint> {
 		}
 
 		return nameValuePair.getValue();
+	}
+
+	protected List<String> getAllParameterValues(List<NameValuePair> nameValuePairList, String key) {
+		return nameValuePairList.stream()
+				.filter(nvp -> nvp.getName().equals(key))
+				.map(nvp -> nvp.getValue())
+				.collect(Collectors.toList());
 	}
 
 	public SonarQubeTestLogger getTestLogger() {
