@@ -1,5 +1,8 @@
 package com.twendelmuth.sonarqube.api.projects;
 
+import com.twendelmuth.sonarqube.coverage.ExcludeFromJacocoGeneratedReport;
+
+@ExcludeFromJacocoGeneratedReport
 public enum ProjectVisibility {
 	PUBLIC("public"),
 	PRIVATE("private");

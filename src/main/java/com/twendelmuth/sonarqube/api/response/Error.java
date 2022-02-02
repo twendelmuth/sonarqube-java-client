@@ -1,5 +1,8 @@
 package com.twendelmuth.sonarqube.api.response;
 
+import com.twendelmuth.sonarqube.coverage.ExcludeFromJacocoGeneratedReport;
+
+@ExcludeFromJacocoGeneratedReport
 public class Error {
 	private String msg;
 
