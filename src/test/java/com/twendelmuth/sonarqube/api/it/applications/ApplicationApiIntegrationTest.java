@@ -6,11 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.ParameterizedTest;
 
 import com.twendelmuth.sonarqube.api.SonarQubeClient;
 import com.twendelmuth.sonarqube.api.SonarQubeLicense;
-import com.twendelmuth.sonarqube.api.SonarQubeVersionEnum;
 import com.twendelmuth.sonarqube.api.applications.ApplicationProjectsParameter;
 import com.twendelmuth.sonarqube.api.applications.ApplicationVisibility;
 import com.twendelmuth.sonarqube.api.applications.ApplicationsApi;
@@ -19,9 +17,12 @@ import com.twendelmuth.sonarqube.api.applications.model.Application;
 import com.twendelmuth.sonarqube.api.applications.response.ApplicationResponse;
 import com.twendelmuth.sonarqube.api.it.AbstractSonarQubeIntegrationTest;
 import com.twendelmuth.sonarqube.api.it.docker.SonarQubeVersion;
+import com.twendelmuth.sonarqube.api.it.engine.ITest;
+import com.twendelmuth.sonarqube.api.it.engine.IntegrationTest;
 import com.twendelmuth.sonarqube.api.response.SonarApiResponse;
 
 @Tag("IntegrationTest")
+@IntegrationTest(license = SonarQubeLicense.DEVELOPER)
 class ApplicationApiIntegrationTest extends AbstractSonarQubeIntegrationTest {
 
 	private static final String MY_APP = "MY_APP";
@@ -34,8 +35,7 @@ class ApplicationApiIntegrationTest extends AbstractSonarQubeIntegrationTest {
 		return response;
 	}
 
-	@ParameterizedTest
-	@SonarQubeVersionEnum(license = SonarQubeLicense.DEVELOPER)
+	@ITest
 	void createApplicationTest(SonarQubeVersion version) throws Exception {
 		SonarQubeClient client = createClient(version);
 		ApplicationResponse response = createApplication(client);
@@ -52,8 +52,7 @@ class ApplicationApiIntegrationTest extends AbstractSonarQubeIntegrationTest {
 		assertJsonIsTheSame(ApplicationsApiTest.getCreateApplicationResponse(), returnBody);
 	}
 
-	@ParameterizedTest
-	@SonarQubeVersionEnum(license = SonarQubeLicense.DEVELOPER)
+	@ITest
 	void createBranch_noBranch(SonarQubeVersion version) {
 		SonarQubeClient client = createClient(version);
 		ApplicationsApi applicationsApi = client.applicationsApi();
@@ -67,8 +66,7 @@ class ApplicationApiIntegrationTest extends AbstractSonarQubeIntegrationTest {
 		assertTrue(response.getErrors().isEmpty());
 	}
 
-	@ParameterizedTest
-	@SonarQubeVersionEnum(license = SonarQubeLicense.DEVELOPER)
+	@ITest
 	void createBranch_withBranch(SonarQubeVersion version) {
 		SonarQubeClient client = createClient(version);
 		ApplicationsApi applicationsApi = client.applicationsApi();
