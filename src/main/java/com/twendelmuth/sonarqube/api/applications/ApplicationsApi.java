@@ -1,6 +1,7 @@
 package com.twendelmuth.sonarqube.api.applications;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -19,19 +20,21 @@ import com.twendelmuth.sonarqube.api.response.SonarApiResponse;
  *
  */
 public class ApplicationsApi extends AbstractApiEndPoint {
-	private static final String PROJECT_BRANCH_PARAMETER = "projectBranch";
+	protected static final String PROJECT_BRANCH_PARAMETER = "projectBranch";
 
-	private static final String BRANCH_PARAMETER = "branch";
+	protected static final String BRANCH_PARAMETER = "branch";
 
-	private static final String VISIBILITY_PARAMETER = "visibility";
+	protected static final String VISIBILITY_PARAMETER = "visibility";
 
-	private static final String KEY_PARAMETER = "key";
+	protected static final String KEY_PARAMETER = "key";
 
-	private static final String DESCRIPTION_PARAMETER = "description";
+	protected static final String DESCRIPTION_PARAMETER = "description";
 
-	private static final String NAME_PARAMETER = "name";
+	protected static final String NAME_PARAMETER = "name";
 
-	private static final String PROJECT_PARAMETER = "project";
+	protected static final String PROJECT_PARAMETER = "project";
+
+	protected static final String TAGS_PARAMETER = "tags";
 
 	private static final String APPLICATION_PARAMETER = "application";
 
@@ -44,6 +47,8 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	private static final String DELETE_BRANCH = "/api/applications/delete_branch";
 
 	private static final String REMOVE_PROJECT = "/api/applications/remove_project";
+
+	private static final String SET_TAGS = "/api/applications/set_tags";
 
 	public ApplicationsApi(SonarQubeServer server, SonarQubeJsonMapper jsonMapper, SonarQubeLogger logger) {
 		super(server, jsonMapper, logger);
@@ -198,8 +203,19 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	 * @param tags Comma-separated list of tags
 	 * @return If call was successful
 	 */
-	public boolean setTags(String application, String tags) {
-		throw new UnsupportedOperationException("Not yet implemented.");
+	public SonarApiResponse setTags(String application, String tags) {
+		assertApplicationParameter(application);
+
+		if (tags == null) {
+			tags = "";
+		}
+
+		List<NameValuePair> parameters = NameValuePair.listOf(APPLICATION_PARAMETER, application, TAGS_PARAMETER, tags);
+		return doPostWithErrorHandling(SET_TAGS, parameters, SonarApiResponse.class);
+	}
+
+	public SonarApiResponse setTags(String application, Collection<String> tags) {
+		return setTags(application, StringUtils.join(tags, ","));
 	}
 
 	/**

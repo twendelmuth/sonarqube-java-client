@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -210,6 +212,52 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 		ApplicationsApi api = buildClassUnderTest(404, "{}");
 		SonarApiResponse response = api.removeProject("MY_APP", "my-project");
 		assertFalse(response.isSuccess());
+	}
+
+	@Test
+	void setTags() {
+		ApplicationsApi api = buildClassUnderTest(200, "{}");
+		SonarApiResponse response = api.setTags("MY_APP", "tag1,tag2");
+		assertTrue(response.isSuccess());
+	}
+
+	@Test
+	void setTags_nullToEmpty() {
+		ApplicationsApi api = buildClassUnderTest(200, "{}");
+		SonarApiResponse response = api.setTags("MY_APP", (String) null);
+		assertTrue(response.isSuccess());
+
+		List<NameValuePair> parameters = getParameterListFromPostRequest();
+		assertNotNull(getFirstParameterValue(parameters, ApplicationsApi.TAGS_PARAMETER));
+	}
+
+	@Test
+	void setTags_noApplication() {
+		ApplicationsApi api = buildClassUnderTest(200, "{}");
+		assertThrows(SonarQubeUnexpectedException.class, () -> api.setTags("", "tag1"));
+	}
+
+	@Test
+	void setTags_useCollection() {
+		List<String> tags = new ArrayList<>();
+		tags.add("tag1");
+		tags.add("tag2");
+		ApplicationsApi api = buildClassUnderTest(200, "{}");
+		SonarApiResponse response = api.setTags("MY_APP", tags);
+		assertTrue(response.isSuccess());
+
+		List<NameValuePair> parameters = getParameterListFromPostRequest();
+		assertEquals("tag1,tag2", getFirstParameterValue(parameters, ApplicationsApi.TAGS_PARAMETER));
+	}
+
+	@Test
+	void setTags_useEmptyCollection() {
+		ApplicationsApi api = buildClassUnderTest(200, "{}");
+		SonarApiResponse response = api.setTags("MY_APP", Collections.EMPTY_LIST);
+		assertTrue(response.isSuccess());
+
+		List<NameValuePair> parameters = getParameterListFromPostRequest();
+		assertNotNull(getFirstParameterValue(parameters, ApplicationsApi.TAGS_PARAMETER));
 	}
 
 }
