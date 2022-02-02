@@ -45,6 +45,8 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 		ApplicationsApi api = buildClassUnderTest("{}");
 		assertTrue(api.addProject(APP_KEY, "project-key").isSuccess());
 
+		assertEquals("/api/applications/add_project", getEndpointFromPostRequest());
+
 		List<NameValuePair> parameters = getParameterListFromPostRequest();
 		assertEquals(APP_KEY, getFirstParameterValue(parameters, ApplicationsApi.APPLICATION_PARAMETER));
 		assertEquals("project-key", getFirstParameterValue(parameters, ApplicationsApi.PROJECT_PARAMETER));
@@ -69,6 +71,8 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 		assertTrue(api.createBranch(APP_KEY, "branch",
 				new ApplicationProjectsParameter().addProject("my-project").addProjectBranch("projectBranch"))
 				.isSuccess());
+
+		assertEquals("/api/applications/create_branch", getEndpointFromPostRequest());
 
 		List<NameValuePair> parameters = getParameterListFromPostRequest();
 		assertEquals(APP_KEY, getFirstParameterValue(parameters, ApplicationsApi.APPLICATION_PARAMETER));
@@ -177,6 +181,8 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 	void deleteApplication() {
 		ApplicationsApi api = buildClassUnderTest("{}");
 		assertTrue(api.deleteApplication(APP_KEY).isSuccess());
+		assertEquals("/api/applications/delete", getEndpointFromPostRequest());
+
 		List<NameValuePair> parameters = getParameterListFromPostRequest();
 		assertEquals(APP_KEY, getFirstParameterValue(parameters, ApplicationsApi.APPLICATION_PARAMETER));
 	}
@@ -198,6 +204,8 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 		ApplicationsApi api = buildClassUnderTest(getCreateApplicationResponse());
 
 		ApplicationResponse response = api.createApplication("My app", "My Application", APP_KEY, ApplicationVisibility.PUBLIC);
+		assertEquals("/api/applications/create", getEndpointFromPostRequest());
+
 		assertNotNull(response);
 		Application app = response.getApplication();
 		assertAll(() -> assertEquals("My app", app.getName()),
@@ -230,6 +238,8 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 	void deleteBranch() {
 		ApplicationsApi api = buildClassUnderTest(200, "{}");
 		SonarApiResponse response = api.deleteBranch(APP_KEY, "myBranch");
+
+		assertEquals("/api/applications/delete_branch", getEndpointFromPostRequest());
 		assertTrue(response.isSuccess());
 		assertEquals(0, response.getErrors().size());
 		List<NameValuePair> parameters = getParameterListFromPostRequest();
@@ -260,6 +270,8 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 	void removeProject() {
 		ApplicationsApi api = buildClassUnderTest(200, "{}");
 		SonarApiResponse response = api.removeProject(APP_KEY, "my-project");
+		assertEquals("/api/applications/remove_project", getEndpointFromPostRequest());
+
 		assertTrue(response.isSuccess());
 		List<NameValuePair> parameters = getParameterListFromPostRequest();
 		assertEquals(APP_KEY, getFirstParameterValue(parameters, ApplicationsApi.APPLICATION_PARAMETER));
@@ -289,6 +301,8 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 	void setTags() {
 		ApplicationsApi api = buildClassUnderTest(200, "{}");
 		SonarApiResponse response = api.setTags(APP_KEY, "tag1,tag2");
+		assertEquals("/api/applications/set_tags", getEndpointFromPostRequest());
+
 		assertTrue(response.isSuccess());
 		List<NameValuePair> parameters = getParameterListFromPostRequest();
 		assertEquals(APP_KEY, getFirstParameterValue(parameters, ApplicationsApi.APPLICATION_PARAMETER));
@@ -338,6 +352,8 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 	void updateApplication() {
 		ApplicationsApi api = buildClassUnderTest(200, "{}");
 		SonarApiResponse response = api.updateApplication(APP_KEY, "name", "description");
+		assertEquals("/api/applications/update", getEndpointFromPostRequest());
+
 		assertTrue(response.isSuccess());
 		List<NameValuePair> parameters = getParameterListFromPostRequest();
 		assertEquals(APP_KEY, getFirstParameterValue(parameters, ApplicationsApi.APPLICATION_PARAMETER));
@@ -384,5 +400,119 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 		assertTrue(response.isSuccess());
 		List<NameValuePair> parameters = getParameterListFromPostRequest();
 		assertEquals(255, getFirstParameterValue(parameters, ApplicationsApi.DESCRIPTION_PARAMETER).length());
+	}
+
+	@Test
+	void updateBranch() {
+		ApplicationsApi api = buildClassUnderTest("{}");
+		assertTrue(api.updateBranch(APP_KEY, "branch",
+				new ApplicationProjectsParameter().addProject("my-project").addProjectBranch("projectBranch"))
+				.isSuccess());
+
+		assertEquals("/api/applications/update_branch", getEndpointFromPostRequest());
+
+		List<NameValuePair> parameters = getParameterListFromPostRequest();
+		assertEquals(APP_KEY, getFirstParameterValue(parameters, ApplicationsApi.APPLICATION_PARAMETER));
+		assertEquals("branch", getFirstParameterValue(parameters, ApplicationsApi.BRANCH_PARAMETER));
+
+		List<String> projects = getAllParameterValues(parameters, ApplicationsApi.PROJECT_PARAMETER);
+		List<String> projectBranches = getAllParameterValues(parameters, ApplicationsApi.PROJECT_BRANCH_PARAMETER);
+		assertAll(
+				() -> assertEquals(1, projects.size()),
+				() -> assertEquals("my-project", projects.get(0)),
+				() -> assertEquals(1, projectBranches.size()),
+				() -> assertEquals("projectBranch", projectBranches.get(0)));
+	}
+
+	@Test
+	void updateBranch_multipleProjects() {
+		ApplicationsApi api = buildClassUnderTest("{}");
+		assertTrue(api.updateBranch(APP_KEY, "branch",
+				new ApplicationProjectsParameter().addProject("my-project").addProject("my-project2").addProjectBranch("projectBranch"))
+				.isSuccess());
+
+		List<NameValuePair> parameters = getParameterListFromPostRequest();
+		assertEquals(APP_KEY, getFirstParameterValue(parameters, ApplicationsApi.APPLICATION_PARAMETER));
+		assertEquals("branch", getFirstParameterValue(parameters, ApplicationsApi.BRANCH_PARAMETER));
+
+		List<String> projects = getAllParameterValues(parameters, ApplicationsApi.PROJECT_PARAMETER);
+		List<String> projectBranches = getAllParameterValues(parameters, ApplicationsApi.PROJECT_BRANCH_PARAMETER);
+		assertAll(
+				() -> assertEquals(2, projects.size()),
+				() -> assertEquals("my-project", projects.get(0)),
+				() -> assertEquals("my-project2", projects.get(1)),
+				() -> assertEquals(1, projectBranches.size()),
+				() -> assertEquals("projectBranch", projectBranches.get(0)));
+	}
+
+	@Test
+	void updateBranch_multipleProjectBranches() {
+		ApplicationsApi api = buildClassUnderTest("{}");
+		assertTrue(api.updateBranch(APP_KEY, "branch",
+				new ApplicationProjectsParameter().addProject("my-project")
+						.addProjectBranch("projectBranch")
+						.addProjectBranch("projectBranch2"))
+				.isSuccess());
+
+		List<NameValuePair> parameters = getParameterListFromPostRequest();
+		assertEquals(APP_KEY, getFirstParameterValue(parameters, ApplicationsApi.APPLICATION_PARAMETER));
+		assertEquals("branch", getFirstParameterValue(parameters, ApplicationsApi.BRANCH_PARAMETER));
+
+		List<String> projects = getAllParameterValues(parameters, ApplicationsApi.PROJECT_PARAMETER);
+		List<String> projectBranches = getAllParameterValues(parameters, ApplicationsApi.PROJECT_BRANCH_PARAMETER);
+		assertAll(
+				() -> assertEquals(1, projects.size()),
+				() -> assertEquals("my-project", projects.get(0)),
+				() -> assertEquals(2, projectBranches.size()),
+				() -> assertEquals("projectBranch", projectBranches.get(0)),
+				() -> assertEquals("projectBranch2", projectBranches.get(1)));
+	}
+
+	@Test
+	void updateBranch_noApplication() {
+		ApplicationsApi api = buildClassUnderTest("{}");
+		ApplicationProjectsParameter params = new ApplicationProjectsParameter().addProject("my-project");
+		assertThrows(SonarQubeUnexpectedException.class, () -> api.updateBranch("", "branch", params));
+	}
+
+	@Test
+	void updateBranch_noProject() {
+		ApplicationsApi api = buildClassUnderTest("{}");
+		ApplicationProjectsParameter params = new ApplicationProjectsParameter();
+		assertThrows(SonarQubeUnexpectedException.class, () -> api.updateBranch(APP_KEY, "branch", params));
+	}
+
+	@Test
+	void updateBranch_noApplicationParams() {
+		ApplicationsApi api = buildClassUnderTest("{}");
+		assertThrows(SonarQubeUnexpectedException.class, () -> api.updateBranch(APP_KEY, "branch", null));
+	}
+
+	@Test
+	void updateBranch_tooLongBranchName() {
+		String branchName = RandomStringUtils.randomAlphabetic(256);
+		ApplicationsApi api = buildClassUnderTest("{}");
+		api.updateBranch(APP_KEY, branchName, new ApplicationProjectsParameter().addProject("my-project"));
+
+		List<NameValuePair> parameters = getParameterListFromPostRequest();
+		assertEquals(255, StringUtils.length(getFirstParameterValue(parameters, "branch")));
+	}
+
+	//TODO confirm that this is actually a successful call.
+	@Test
+	void updateBranch_noBranch() {
+		ApplicationsApi api = buildClassUnderTest("{}");
+		assertTrue(api.updateBranch(APP_KEY, "",
+				new ApplicationProjectsParameter().addProject("my-project").addProjectBranch("projectBranch"))
+				.isSuccess());
+	}
+
+	//TODO confirm that this is actually a successful call.
+	@Test
+	void updateBranch_noProjectBranch() {
+		ApplicationsApi api = buildClassUnderTest("{}");
+		assertTrue(api.updateBranch(APP_KEY, "branch",
+				new ApplicationProjectsParameter().addProject("my-project"))
+				.isSuccess());
 	}
 }

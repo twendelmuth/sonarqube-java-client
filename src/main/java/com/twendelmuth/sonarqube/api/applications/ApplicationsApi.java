@@ -50,7 +50,11 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 
 	private static final String SET_TAGS = "/api/applications/set_tags";
 
-	private static final String UPDATE_APPLICATION = "/api/applications/set_tags";
+	private static final String UPDATE_APPLICATION = "/api/applications/update";
+
+	private static final String CREATE_BRANCH = "/api/applications/create_branch";
+
+	private static final String UPDATE_BRANCH = "/api/applications/update_branch";
 
 	public ApplicationsApi(SonarQubeServer server, SonarQubeJsonMapper jsonMapper, SonarQubeLogger logger) {
 		super(server, jsonMapper, logger);
@@ -132,6 +136,11 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	 * @return
 	 */
 	public SonarApiResponse createBranch(String application, String branch, ApplicationProjectsParameter applicationProjectsParameter) {
+		return postForBranch(CREATE_BRANCH, application, branch, applicationProjectsParameter);
+	}
+
+	private SonarApiResponse postForBranch(String endPoint, String application, String branch,
+			ApplicationProjectsParameter applicationProjectsParameter) {
 		assertApplicationParameter(application);
 		if (applicationProjectsParameter == null) {
 			throw new SonarQubeUnexpectedException("applicationProjectsParameter is required");
@@ -152,7 +161,7 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 		applicationProjectsParameter.getProjectBranchesList().stream()
 				.forEach(projectBranch -> parameters.add(new NameValuePair(PROJECT_BRANCH_PARAMETER, projectBranch)));
 
-		return doPostWithErrorHandling(ADD_PROJECT, parameters, SonarApiResponse.class);
+		return doPostWithErrorHandling(endPoint, parameters, SonarApiResponse.class);
 	}
 
 	/**
@@ -252,14 +261,14 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	/**
 	 * Update a branch on a given application.
 	 * Requires 'Administrator' permission on the application and 'Browse' permission on its child projects
-	 * @param application Application key
-	 * @param project
-	 * @param projectBranch
+	 * 
+	 * @param application
 	 * @param branch
-	 * @param name
+	 * @param applicationProjectsParameter
+	 * @return
 	 */
-	public boolean updateBranch(String application, List<String> projects, List<String> projectBranch, String branch, String name) {
-		throw new UnsupportedOperationException("Not yet implemented.");
+	public SonarApiResponse updateBranch(String application, String branch, ApplicationProjectsParameter applicationProjectsParameter) {
+		return postForBranch(UPDATE_BRANCH, application, branch, applicationProjectsParameter);
 	}
 
 }

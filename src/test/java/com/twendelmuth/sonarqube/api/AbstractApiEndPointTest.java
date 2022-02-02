@@ -88,13 +88,24 @@ public abstract class AbstractApiEndPointTest<T extends AbstractApiEndPoint> {
 		}
 	}
 
+	protected String getEndpointFromPostRequest() {
+		try {
+			ArgumentCaptor<String> endpoint = ArgumentCaptor.forClass(String.class);
+			Mockito.verify(getSonarQubeServer()).doPost(endpoint.capture(), any());
+			return endpoint.getValue();
+		} catch (Exception e) {
+			LOGGER.warn("Exception while trying to get endpoint from POST-request", e);
+			return "";
+		}
+	}
+
 	protected List<NameValuePair> getParameterListFromPostRequest() {
 		try {
 			ArgumentCaptor<List<NameValuePair>> endpointParameter = ArgumentCaptor.forClass(List.class);
 			Mockito.verify(getSonarQubeServer()).doPost(anyString(), endpointParameter.capture());
 			return endpointParameter.getValue();
 		} catch (Exception e) {
-			LOGGER.warn("Exception while trying to get parameterMap from GET-request", e);
+			LOGGER.warn("Exception while trying to get parameterMap from POST-request", e);
 			return new ArrayList<>();
 		}
 	}
