@@ -241,9 +241,9 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 		assertApplicationParameter(application);
 		assertNameParameter(name);
 
-		List<NameValuePair> parameters = NameValuePair.listOf(APPLICATION_PARAMETER, application, NAME_PARAMETER, name);
+		List<NameValuePair> parameters = NameValuePair.listOf(APPLICATION_PARAMETER, application, NAME_PARAMETER, StringUtils.left(name, 255));
 		if (StringUtils.isNotBlank(description)) {
-			parameters.add(new NameValuePair(DESCRIPTION_PARAMETER, description));
+			parameters.add(new NameValuePair(DESCRIPTION_PARAMETER, StringUtils.left(description, 255)));
 		}
 
 		return doPostWithErrorHandling(UPDATE_APPLICATION, parameters, SonarApiResponse.class);

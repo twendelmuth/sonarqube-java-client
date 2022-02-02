@@ -291,4 +291,24 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 		List<NameValuePair> parameters = getParameterListFromPostRequest();
 		assertNull(getFirstParameterValue(parameters, ApplicationsApi.DESCRIPTION_PARAMETER));
 	}
+
+	@Test
+	void updateApplication_nameOver255Chars() {
+		String name = RandomStringUtils.randomAlphabetic(256);
+		ApplicationsApi api = buildClassUnderTest(200, "{}");
+		SonarApiResponse response = api.updateApplication("MY_APP", name, "");
+		assertTrue(response.isSuccess());
+		List<NameValuePair> parameters = getParameterListFromPostRequest();
+		assertEquals(255, getFirstParameterValue(parameters, ApplicationsApi.NAME_PARAMETER).length());
+	}
+
+	@Test
+	void updateApplication_descriptionOver255Chars() {
+		String description = RandomStringUtils.randomAlphabetic(256);
+		ApplicationsApi api = buildClassUnderTest(200, "{}");
+		SonarApiResponse response = api.updateApplication("MY_APP", "name", description);
+		assertTrue(response.isSuccess());
+		List<NameValuePair> parameters = getParameterListFromPostRequest();
+		assertEquals(255, getFirstParameterValue(parameters, ApplicationsApi.DESCRIPTION_PARAMETER).length());
+	}
 }
