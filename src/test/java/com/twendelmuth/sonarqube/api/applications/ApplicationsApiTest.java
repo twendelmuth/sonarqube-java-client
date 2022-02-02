@@ -23,6 +23,7 @@ import com.twendelmuth.sonarqube.api.applications.model.Application;
 import com.twendelmuth.sonarqube.api.applications.response.ApplicationResponse;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeUnexpectedException;
 import com.twendelmuth.sonarqube.api.logging.SonarQubeTestLogger;
+import com.twendelmuth.sonarqube.api.response.SonarApiResponse;
 
 public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi> {
 
@@ -156,6 +157,33 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 		assertAll(() -> assertNull(getFirstParameterValue(parameters, "description")),
 				() -> assertNull(getFirstParameterValue(parameters, "key")),
 				() -> assertNull(getFirstParameterValue(parameters, "visibility")));
+	}
+
+	@Test
+	void deleteBranch() {
+		ApplicationsApi api = buildClassUnderTest(200, "{}");
+		SonarApiResponse response = api.deleteBranch("MY_APP", "myBranch");
+		assertTrue(response.isSuccess());
+		assertEquals(0, response.getErrors().size());
+	}
+
+	@Test
+	void deleteBranch_appParamMissing() {
+		ApplicationsApi api = buildClassUnderTest(200, "{}");
+		assertThrows(SonarQubeUnexpectedException.class, () -> api.deleteBranch("", "myBranch"));
+	}
+
+	@Test
+	void deleteBranch_branchParamMissing() {
+		ApplicationsApi api = buildClassUnderTest(200, "{}");
+		assertThrows(SonarQubeUnexpectedException.class, () -> api.deleteBranch("MY_APP", ""));
+	}
+
+	@Test
+	void deleteBranch_notFound() {
+		ApplicationsApi api = buildClassUnderTest(404, "{}");
+		SonarApiResponse response = api.deleteBranch("MY_APP", "myBranch");
+		assertFalse(response.isSuccess());
 	}
 
 }

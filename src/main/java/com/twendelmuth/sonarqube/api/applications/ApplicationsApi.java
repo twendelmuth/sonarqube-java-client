@@ -41,6 +41,8 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 
 	private static final String DELETE_APPLICATION = "/api/applications/delete";
 
+	private static final String DELETE_BRANCH = "/api/applications/delete_branch";
+
 	public ApplicationsApi(SonarQubeServer server, SonarQubeJsonMapper jsonMapper, SonarQubeLogger logger) {
 		super(server, jsonMapper, logger);
 	}
@@ -145,9 +147,7 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	 * @return If call was successful
 	 */
 	public SonarApiResponse deleteApplication(String application) {
-		if (StringUtils.isBlank(application)) {
-			throw new SonarQubeUnexpectedException("Application cannot be empty");
-		}
+		assertApplicationParameter(application);
 
 		List<NameValuePair> parameters = NameValuePair.listOf(APPLICATION_PARAMETER, application);
 		return doPostWithErrorHandling(DELETE_APPLICATION, parameters, SonarApiResponse.class);
@@ -160,8 +160,14 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	 * @param branch Branch name
 	 * @return If call was successful
 	 */
-	public boolean deleteBranch(String application, String branch) {
-		throw new UnsupportedOperationException("Not yet implemented.");
+	public SonarApiResponse deleteBranch(String application, String branch) {
+		assertApplicationParameter(application);
+		if (StringUtils.isBlank(branch)) {
+			throw new SonarQubeUnexpectedException("Branch cannot be empty");
+		}
+
+		List<NameValuePair> parameters = NameValuePair.listOf(APPLICATION_PARAMETER, application, BRANCH_PARAMETER, branch);
+		return doPostWithErrorHandling(DELETE_BRANCH, parameters, SonarApiResponse.class);
 	}
 
 	/**
