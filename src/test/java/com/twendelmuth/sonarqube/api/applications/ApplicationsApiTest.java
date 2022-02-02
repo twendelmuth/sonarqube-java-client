@@ -260,4 +260,35 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 		assertNotNull(getFirstParameterValue(parameters, ApplicationsApi.TAGS_PARAMETER));
 	}
 
+	@Test
+	void updateApplication() {
+		ApplicationsApi api = buildClassUnderTest(200, "{}");
+		SonarApiResponse response = api.updateApplication("MY_APP", "name", "description");
+		assertTrue(response.isSuccess());
+		List<NameValuePair> parameters = getParameterListFromPostRequest();
+		assertEquals("MY_APP", getFirstParameterValue(parameters, ApplicationsApi.APPLICATION_PARAMETER));
+		assertEquals("name", getFirstParameterValue(parameters, ApplicationsApi.NAME_PARAMETER));
+		assertEquals("description", getFirstParameterValue(parameters, ApplicationsApi.DESCRIPTION_PARAMETER));
+	}
+
+	@Test
+	void updateApplication_noApplication() {
+		ApplicationsApi api = buildClassUnderTest(200, "{}");
+		assertThrows(SonarQubeUnexpectedException.class, () -> api.updateApplication("", "", "description"));
+	}
+
+	@Test
+	void updateApplication_noName() {
+		ApplicationsApi api = buildClassUnderTest(200, "{}");
+		assertThrows(SonarQubeUnexpectedException.class, () -> api.updateApplication("MY_APP", "", "description"));
+	}
+
+	@Test
+	void updateApplication_noDescription() {
+		ApplicationsApi api = buildClassUnderTest(200, "{}");
+		SonarApiResponse response = api.updateApplication("MY_APP", "name", "");
+		assertTrue(response.isSuccess());
+		List<NameValuePair> parameters = getParameterListFromPostRequest();
+		assertNull(getFirstParameterValue(parameters, ApplicationsApi.DESCRIPTION_PARAMETER));
+	}
 }

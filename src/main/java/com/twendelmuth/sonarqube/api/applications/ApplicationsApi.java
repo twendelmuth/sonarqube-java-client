@@ -36,7 +36,7 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 
 	protected static final String TAGS_PARAMETER = "tags";
 
-	private static final String APPLICATION_PARAMETER = "application";
+	protected static final String APPLICATION_PARAMETER = "application";
 
 	private static final String ADD_APPLICATION = "/api/applications/create";
 
@@ -49,6 +49,8 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	private static final String REMOVE_PROJECT = "/api/applications/remove_project";
 
 	private static final String SET_TAGS = "/api/applications/set_tags";
+
+	private static final String UPDATE_APPLICATION = "/api/applications/set_tags";
 
 	public ApplicationsApi(SonarQubeServer server, SonarQubeJsonMapper jsonMapper, SonarQubeLogger logger) {
 		super(server, jsonMapper, logger);
@@ -235,8 +237,16 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	 * @param name New name for the application
 	 * @param description New description for the application (optional)
 	 */
-	public boolean updateApplication(String application, String name, String description) {
-		throw new UnsupportedOperationException("Not yet implemented.");
+	public SonarApiResponse updateApplication(String application, String name, String description) {
+		assertApplicationParameter(application);
+		assertNameParameter(name);
+
+		List<NameValuePair> parameters = NameValuePair.listOf(APPLICATION_PARAMETER, application, NAME_PARAMETER, name);
+		if (StringUtils.isNotBlank(description)) {
+			parameters.add(new NameValuePair(DESCRIPTION_PARAMETER, description));
+		}
+
+		return doPostWithErrorHandling(UPDATE_APPLICATION, parameters, SonarApiResponse.class);
 	}
 
 	/**
