@@ -24,7 +24,12 @@ class IntegrationSettingsTest {
 
 	@Test
 	void testDefaults() {
-		IntegrationSettings integrationSettings = new IntegrationSettings();
+		IntegrationSettings integrationSettings = new IntegrationSettings() {
+			@Override
+			protected Properties getSystemProperties() {
+				return new Properties();
+			}
+		};
 		assertEquals(SonarQubeVersion.values().length, integrationSettings.getAvailableSonarQubeVersions().size());
 	}
 
