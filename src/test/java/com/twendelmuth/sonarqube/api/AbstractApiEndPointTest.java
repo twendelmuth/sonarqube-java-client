@@ -1,22 +1,30 @@
 package com.twendelmuth.sonarqube.api;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.twendelmuth.sonarqube.api.exception.SonarQubeClientJsonException;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeServerError;
 import com.twendelmuth.sonarqube.api.logging.SonarQubeTestLogger;
 import com.twendelmuth.sonarqube.api.response.SonarApiResponse;
+import com.twendelmuth.sonarqube.testing.util.UrlTools;
 
 public abstract class AbstractApiEndPointTest<T extends AbstractApiEndPoint> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractApiEndPointTest.class);
+
 	private SonarQubeTestLogger testLogger;
 
 	private SonarQubeJsonMapper jsonMapper;
@@ -65,11 +73,38 @@ public abstract class AbstractApiEndPointTest<T extends AbstractApiEndPoint> {
 	}
 
 	protected String getStringFromResource(String resource) {
+		return IOHelper.getStringFromResource(this.getClass(), resource);
+	}
+
+	protected Map<String, String> getParameterMapFromGetRequest() {
 		try {
-			return IOUtils.toString(this.getClass().getResourceAsStream(resource), StandardCharsets.UTF_8);
-		} catch (IOException e) {
-			throw new RuntimeException("Couldn't read resource during test", e);
+			ArgumentCaptor<String> endpointParameter = ArgumentCaptor.forClass(String.class);
+			Mockito.verify(getSonarQubeServer()).doGet(endpointParameter.capture());
+			return UrlTools.extractQueryParameterMap(endpointParameter.getValue());
+		} catch (Exception e) {
+			LOGGER.warn("Exception while trying to get parameterMap from GET-request", e);
+			return new HashMap<>();
 		}
+	}
+
+	protected List<NameValuePair> getParameterListFromPostRequest() {
+		try {
+			ArgumentCaptor<List<NameValuePair>> endpointParameter = ArgumentCaptor.forClass(List.class);
+			Mockito.verify(getSonarQubeServer()).doPost(anyString(), endpointParameter.capture());
+			return endpointParameter.getValue();
+		} catch (Exception e) {
+			LOGGER.warn("Exception while trying to get parameterMap from GET-request", e);
+			return new ArrayList<>();
+		}
+	}
+
+	protected String getFirstParameterValue(List<NameValuePair> nameValuePairList, String key) {
+		NameValuePair nameValuePair = nameValuePairList.stream().filter(nvp -> nvp.getName().equals(key)).findFirst().orElse(null);
+		if (nameValuePair == null) {
+			return null;
+		}
+
+		return nameValuePair.getValue();
 	}
 
 	public SonarQubeTestLogger getTestLogger() {

@@ -1,0 +1,9 @@
+{
+  "application": {
+    "key": "MY_APP",
+    "name": "My app",
+    "description": "My Application",
+    "visibility": "public",
+    "projects": []
+  }
+}

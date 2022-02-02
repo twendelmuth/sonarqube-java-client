@@ -2,6 +2,7 @@
   "project": {
     "key": "project-key",
     "name": "project-name",
-    "qualifier": "TRK"
+    "qualifier": "TRK",
+    "visibility": "public"
   }
 }

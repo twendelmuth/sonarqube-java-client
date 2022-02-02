@@ -2,6 +2,7 @@ package com.twendelmuth.sonarqube.api.it.docker;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.hc.core5.http.HttpRequest;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
+import com.twendelmuth.sonarqube.api.NameValuePair;
 import com.twendelmuth.sonarqube.api.SonarQubeJacksonMapper;
 import com.twendelmuth.sonarqube.api.SonarQubeServerHttpClient;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeClientException;
@@ -71,9 +73,7 @@ public class SonarQubeDockerContainer {
 			}
 		};
 
-		Map<String, String> parameters = new HashMap<>();
-		parameters.put("login", "admin");
-		parameters.put("name", "it-token");
+		List<NameValuePair> parameters = NameValuePair.listOf("login", "admin", "name", "it-token");
 
 		try {
 			String response = httpClient.doPost("/api/user_tokens/generate", parameters).getReturnedBody();

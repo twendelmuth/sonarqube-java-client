@@ -1,10 +1,9 @@
 package com.twendelmuth.sonarqube.api;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -18,7 +17,6 @@ import org.apache.hc.core5.http.EntityDetails;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.HttpRequestInterceptor;
-import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.http.protocol.HttpContext;
 
@@ -78,11 +76,12 @@ public class SonarQubeServerHttpClient implements SonarQubeServer {
 	}
 
 	@Override
-	public SonarApiResponse doPost(String apiEndPoint, Map<String, String> parameters) throws SonarQubeServerError {
+	public SonarApiResponse doPost(String apiEndPoint, List<NameValuePair> parameters) throws SonarQubeServerError {
 		HttpPost httpPost = new HttpPost(serverUrl + apiEndPoint);
 
-		List<NameValuePair> params = new ArrayList<>();
-		parameters.entrySet().forEach(entry -> params.add(new BasicNameValuePair(entry.getKey(), entry.getValue())));
+		List<BasicNameValuePair> params = parameters.stream()
+				.map(nvp -> new BasicNameValuePair(nvp.getName(), nvp.getValue()))
+				.collect(Collectors.toList());
 		httpPost.setEntity(new UrlEncodedFormEntity(params));
 
 		return execute(httpPost);

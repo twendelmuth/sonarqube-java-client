@@ -1,18 +1,14 @@
 package com.twendelmuth.sonarqube.api.project.tags;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 import com.twendelmuth.sonarqube.api.AbstractApiEndPointTest;
+import com.twendelmuth.sonarqube.api.NameValuePair;
 import com.twendelmuth.sonarqube.api.SonarQubeJsonMapper;
 import com.twendelmuth.sonarqube.api.SonarQubeServer;
 import com.twendelmuth.sonarqube.api.logging.SonarQubeTestLogger;
@@ -37,9 +33,8 @@ class ProjectTagsApiTest extends AbstractApiEndPointTest<ProjectTagsApi> {
 		SonarApiResponse response = api.setTags(projectKey, tagSet);
 		assertEquals(200, response.getStatusCode());
 
-		ArgumentCaptor<Map<String, String>> parameterCaptor = ArgumentCaptor.forClass(HashMap.class);
-		Mockito.verify(getSonarQubeServer()).doPost(any(), parameterCaptor.capture());
-		assertEquals("tag-1,tag-2", parameterCaptor.getValue().get("tags"));
+		List<NameValuePair> parameters = getParameterListFromPostRequest();
+		assertEquals("tag-1,tag-2", getFirstParameterValue(parameters, "tags"));
 	}
 
 	@Test
@@ -49,9 +44,8 @@ class ProjectTagsApiTest extends AbstractApiEndPointTest<ProjectTagsApi> {
 		SonarApiResponse response = api.setTags(projectKey, tags);
 		assertEquals(200, response.getStatusCode());
 
-		ArgumentCaptor<Map<String, String>> parameterCaptor = ArgumentCaptor.forClass(HashMap.class);
-		Mockito.verify(getSonarQubeServer()).doPost(any(), parameterCaptor.capture());
-		assertEquals(tags, parameterCaptor.getValue().get("tags"));
+		List<NameValuePair> parameters = getParameterListFromPostRequest();
+		assertEquals(tags, getFirstParameterValue(parameters, "tags"));
 	}
 
 }
