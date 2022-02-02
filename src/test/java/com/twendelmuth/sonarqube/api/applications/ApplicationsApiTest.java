@@ -186,4 +186,30 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 		assertFalse(response.isSuccess());
 	}
 
+	@Test
+	void removeProject() {
+		ApplicationsApi api = buildClassUnderTest(200, "{}");
+		SonarApiResponse response = api.removeProject("MY_APP", "my-project");
+		assertTrue(response.isSuccess());
+	}
+
+	@Test
+	void removeProject_noApplication() {
+		ApplicationsApi api = buildClassUnderTest(200, "{}");
+		assertThrows(SonarQubeUnexpectedException.class, () -> api.removeProject("", "my-project"));
+	}
+
+	@Test
+	void removeProject_noProject() {
+		ApplicationsApi api = buildClassUnderTest(200, "{}");
+		assertThrows(SonarQubeUnexpectedException.class, () -> api.removeProject("MY_APP", ""));
+	}
+
+	@Test
+	void removeProject_notFound() {
+		ApplicationsApi api = buildClassUnderTest(404, "{}");
+		SonarApiResponse response = api.removeProject("MY_APP", "my-project");
+		assertFalse(response.isSuccess());
+	}
+
 }

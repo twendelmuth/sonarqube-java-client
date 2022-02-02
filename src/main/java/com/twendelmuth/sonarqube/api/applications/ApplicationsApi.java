@@ -43,6 +43,8 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 
 	private static final String DELETE_BRANCH = "/api/applications/delete_branch";
 
+	private static final String REMOVE_PROJECT = "/api/applications/remove_project";
+
 	public ApplicationsApi(SonarQubeServer server, SonarQubeJsonMapper jsonMapper, SonarQubeLogger logger) {
 		super(server, jsonMapper, logger);
 	}
@@ -62,6 +64,12 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	private void assertNameParameter(String name) {
 		if (StringUtils.isBlank(name)) {
 			throw new SonarQubeUnexpectedException("Name cannot be empty");
+		}
+	}
+
+	private void assertBranchParameter(String branch) {
+		if (StringUtils.isBlank(branch)) {
+			throw new SonarQubeUnexpectedException("Branch cannot be empty");
 		}
 	}
 
@@ -162,9 +170,7 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	 */
 	public SonarApiResponse deleteBranch(String application, String branch) {
 		assertApplicationParameter(application);
-		if (StringUtils.isBlank(branch)) {
-			throw new SonarQubeUnexpectedException("Branch cannot be empty");
-		}
+		assertBranchParameter(branch);
 
 		List<NameValuePair> parameters = NameValuePair.listOf(APPLICATION_PARAMETER, application, BRANCH_PARAMETER, branch);
 		return doPostWithErrorHandling(DELETE_BRANCH, parameters, SonarApiResponse.class);
@@ -177,8 +183,12 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	 * @param project Key of the project
 	 * @return If call was successful
 	 */
-	public boolean removeProject(String application, String project) {
-		throw new UnsupportedOperationException("Not yet implemented.");
+	public SonarApiResponse removeProject(String application, String project) {
+		assertApplicationParameter(application);
+		assertProjectParameter(project);
+
+		List<NameValuePair> parameters = NameValuePair.listOf(APPLICATION_PARAMETER, application, PROJECT_PARAMETER, project);
+		return doPostWithErrorHandling(REMOVE_PROJECT, parameters, SonarApiResponse.class);
 	}
 
 	/**
