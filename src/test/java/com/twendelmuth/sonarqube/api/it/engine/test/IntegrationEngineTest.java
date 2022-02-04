@@ -76,7 +76,7 @@ class IntegrationEngineTest {
 		EngineTestKit
 				.engine("SonarQubeIntegrationTestEngine")
 				.selectors(DiscoverySelectors.selectMethod(ExampleIntegrationTest.class, "test", SonarQubeVersion.class.getCanonicalName()))
-				.filters(TagFilter.excludeTags("integrationTest"))
+				.filters(TagFilter.excludeTags("IntegrationTest"))
 				.execute()
 				.testEvents()
 				.assertStatistics(assertStatistics(0));

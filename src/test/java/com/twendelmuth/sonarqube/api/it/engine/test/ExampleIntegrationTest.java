@@ -7,7 +7,7 @@ import com.twendelmuth.sonarqube.api.it.engine.ITest;
 import com.twendelmuth.sonarqube.api.it.engine.IntegrationTest;
 
 @IntegrationTest(shouldStartServer = false)
-@Tag("integrationTest")
+@Tag("IntegrationTest")
 public class ExampleIntegrationTest {
 
 	@ITest
