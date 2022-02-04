@@ -341,6 +341,7 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 	@Test
 	void setTags_useEmptyCollection() {
 		ApplicationsApi api = buildClassUnderTest(200, "{}");
+		@SuppressWarnings("unchecked")
 		SonarApiResponse response = api.setTags(APP_KEY, Collections.EMPTY_LIST);
 		assertTrue(response.isSuccess());
 

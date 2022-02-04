@@ -161,14 +161,16 @@ public class IntegrationTestEngine implements TestEngine {
 
 	private void executeIntegrationSonarLicenseContainer(EngineExecutionListener listener, IntegrationSonarLicenseContainer container) {
 		SonarQubeVersion version = container.getSonarQubeVersion();
-		listener.executionStarted(container);
 
 		container.getChildren().forEach(testDescriptor -> {
 
 			if (testDescriptor instanceof IntegrationTestEngineTestDescriptor) {
 				try {
+					listener.executionStarted(testDescriptor);
 					executeIntegrationTestEngineTestDescriptor(version, listener, (IntegrationTestEngineTestDescriptor) testDescriptor);
 				} catch (Exception e) {
+					listener.executionFinished(testDescriptor,
+							TestExecutionResult.failed(e));
 				}
 			} else {
 				listener.executionStarted(testDescriptor);
@@ -180,7 +182,6 @@ public class IntegrationTestEngine implements TestEngine {
 	private void executeIntegrationTestEngineTestDescriptor(SonarQubeVersion version, EngineExecutionListener listener,
 			IntegrationTestEngineTestDescriptor testDescriptor) {
 		listener.executionStarted(testDescriptor);
-		Object classUnderTest = ReflectionUtils.newInstance(testDescriptor.getTestClass());
 
 		boolean serverStarted = false;
 		AtomicBoolean keepRunning = new AtomicBoolean(true);
@@ -201,7 +202,10 @@ public class IntegrationTestEngine implements TestEngine {
 					}
 				}
 
-				executeIntegrationTestEngineMethodDescriptor(version, classUnderTest, listener, (IntegrationTestEngineMethodDescriptor) testMethod);
+				listener.executionStarted(testMethod);
+				Object classUnderTest = ReflectionUtils.newInstance(testDescriptor.getTestClass());
+				executeIntegrationTestEngineMethodDescriptor(version, classUnderTest, listener,
+						(IntegrationTestEngineMethodDescriptor) testMethod);
 			} else {
 				listener.executionStarted(testMethod);
 				listener.executionFinished(testMethod,
@@ -212,27 +216,39 @@ public class IntegrationTestEngine implements TestEngine {
 		if (serverStarted) {
 			SonarQubeDockerContainer.build(version).stopSonarQubeContainer();
 		}
+		listener.executionFinished(testDescriptor, TestExecutionResult.successful());
 
 	}
 
 	private void executeIntegrationTestEngineMethodDescriptor(SonarQubeVersion version, Object testClass, EngineExecutionListener listener,
 			IntegrationTestEngineMethodDescriptor methodDescriptor) {
 		listener.executionStarted(methodDescriptor);
-		runMethodsOnTestClass(testClass, ReflectionUtils.findMethods(testClass.getClass(), isMethodWithAnnotation(BeforeEach.class)));
+
+		boolean isSuccess = true;
 
 		try {
+			runMethodsOnTestClass(testClass, ReflectionUtils.findMethods(testClass.getClass(), isMethodWithAnnotation(BeforeEach.class)));
 			if (methodDescriptor.getJavaMethod().getParameterCount() == 1
 					&& methodDescriptor.getJavaMethod().getParameters()[0].getType().isAssignableFrom(SonarQubeVersion.class)) {
 				ReflectionUtils.invokeMethod(methodDescriptor.getJavaMethod(), testClass, version);
-				listener.executionFinished(methodDescriptor, TestExecutionResult.successful());
 			} else {
 				throw new UnsupportedOperationException("Method needs to have only one parameter of type SonarQubeVersion");
 			}
 
-		} catch (Exception e) {
+		} catch (Throwable e) {
+			isSuccess = false;
 			listener.executionFinished(methodDescriptor, TestExecutionResult.failed(e));
-		} finally {
+		}
+
+		try {
 			runMethodsOnTestClass(testClass, ReflectionUtils.findMethods(testClass.getClass(), isMethodWithAnnotation(AfterEach.class)));
+		} catch (Throwable e) {
+			isSuccess = false;
+			listener.executionFinished(methodDescriptor, TestExecutionResult.failed(e));
+		}
+
+		if (isSuccess) {
+			listener.executionFinished(methodDescriptor, TestExecutionResult.successful());
 		}
 	}
 
