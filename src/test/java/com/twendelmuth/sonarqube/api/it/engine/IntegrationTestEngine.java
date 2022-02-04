@@ -189,6 +189,8 @@ public class IntegrationTestEngine implements TestEngine {
 		testDescriptor.getChildren().forEach(testMethod -> {
 			if (testMethod instanceof IntegrationTestEngineMethodDescriptor) {
 				if (!keepRunning.get()) {
+					listener.executionFinished(testMethod,
+							TestExecutionResult.failed(new AssertionError("Couldn't start docker containers")));
 					return;
 				}
 
