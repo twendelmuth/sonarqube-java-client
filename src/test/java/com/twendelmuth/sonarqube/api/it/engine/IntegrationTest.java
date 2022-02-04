@@ -15,7 +15,7 @@ import com.twendelmuth.sonarqube.api.SonarQubeLicense;
 @Retention(RUNTIME)
 @Target({ TYPE, METHOD })
 @Testable
-@Tag("IntegrationTest")
+@Tag("integrationTest")
 public @interface IntegrationTest {
 	SonarQubeLicense license() default SonarQubeLicense.COMMUNITY;
 

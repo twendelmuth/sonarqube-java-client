@@ -149,7 +149,7 @@ public class IntegrationTestEngine implements TestEngine {
 		testDescriptor.getChildren().forEach(licenseContainer -> {
 			if (licenseContainer instanceof IntegrationSonarLicenseContainer) {
 				try {
-					executeIntegrationSonarLicenseContainer(listener, (IntegrationSonarLicenseContainer) licenseContainer);
+					executeSonarLicenseContainer(listener, (IntegrationSonarLicenseContainer) licenseContainer);
 					listener.executionFinished(testDescriptor, TestExecutionResult.successful());
 				} catch (Exception e) {
 					listener.executionFinished(testDescriptor, TestExecutionResult.failed(e));
@@ -159,7 +159,7 @@ public class IntegrationTestEngine implements TestEngine {
 
 	}
 
-	private void executeIntegrationSonarLicenseContainer(EngineExecutionListener listener, IntegrationSonarLicenseContainer container) {
+	private void executeSonarLicenseContainer(EngineExecutionListener listener, IntegrationSonarLicenseContainer container) {
 		SonarQubeVersion version = container.getSonarQubeVersion();
 
 		container.getChildren().forEach(testDescriptor -> {
@@ -167,7 +167,7 @@ public class IntegrationTestEngine implements TestEngine {
 			if (testDescriptor instanceof IntegrationTestEngineTestDescriptor) {
 				try {
 					listener.executionStarted(testDescriptor);
-					executeIntegrationTestEngineTestDescriptor(version, listener, (IntegrationTestEngineTestDescriptor) testDescriptor);
+					executeTestClass(version, listener, (IntegrationTestEngineTestDescriptor) testDescriptor);
 				} catch (Exception e) {
 					listener.executionFinished(testDescriptor,
 							TestExecutionResult.failed(e));
@@ -179,7 +179,7 @@ public class IntegrationTestEngine implements TestEngine {
 		});
 	}
 
-	private void executeIntegrationTestEngineTestDescriptor(SonarQubeVersion version, EngineExecutionListener listener,
+	private void executeTestClass(SonarQubeVersion version, EngineExecutionListener listener,
 			IntegrationTestEngineTestDescriptor testDescriptor) {
 		listener.executionStarted(testDescriptor);
 
@@ -202,9 +202,8 @@ public class IntegrationTestEngine implements TestEngine {
 					}
 				}
 
-				listener.executionStarted(testMethod);
 				Object classUnderTest = ReflectionUtils.newInstance(testDescriptor.getTestClass());
-				executeIntegrationTestEngineMethodDescriptor(version, classUnderTest, listener,
+				executeTestMethod(version, classUnderTest, listener,
 						(IntegrationTestEngineMethodDescriptor) testMethod);
 			} else {
 				listener.executionStarted(testMethod);
@@ -220,7 +219,7 @@ public class IntegrationTestEngine implements TestEngine {
 
 	}
 
-	private void executeIntegrationTestEngineMethodDescriptor(SonarQubeVersion version, Object testClass, EngineExecutionListener listener,
+	private void executeTestMethod(SonarQubeVersion version, Object testClass, EngineExecutionListener listener,
 			IntegrationTestEngineMethodDescriptor methodDescriptor) {
 		listener.executionStarted(methodDescriptor);
 
@@ -257,6 +256,11 @@ public class IntegrationTestEngine implements TestEngine {
 	}
 
 	private static Predicate<Class<?>> isTestClass() {
+		return classCandidate -> AnnotationSupport.isAnnotated(classCandidate, IntegrationTest.class);
+	}
+
+	private static Predicate<Class<?>> isTestClass(EngineDiscoveryRequest discoveryRequest) {
+		//		Filter.composeFilters(discoveryRequest.getFiltersByType(null))
 		return classCandidate -> AnnotationSupport.isAnnotated(classCandidate, IntegrationTest.class);
 	}
 
