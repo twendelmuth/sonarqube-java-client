@@ -142,11 +142,15 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	private SonarApiResponse postForBranch(String endPoint, String application, String branch,
 			ApplicationProjectsParameter applicationProjectsParameter) {
 		assertApplicationParameter(application);
+		assertBranchParameter(branch);
 		if (applicationProjectsParameter == null) {
 			throw new SonarQubeUnexpectedException("applicationProjectsParameter is required");
 		}
 		if (applicationProjectsParameter.areProjectsEmpty()) {
 			throw new SonarQubeUnexpectedException("Need at least one project");
+		}
+		if (applicationProjectsParameter.areProjectBranchesEmpty()) {
+			throw new SonarQubeUnexpectedException("Need at least one project-branch");
 		}
 
 		List<NameValuePair> parameters = new ArrayList<>();

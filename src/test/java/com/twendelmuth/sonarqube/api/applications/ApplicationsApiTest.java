@@ -155,7 +155,7 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 	void createBranch_tooLongBranchName() {
 		String branchName = RandomStringUtils.randomAlphabetic(256);
 		ApplicationsApi api = buildClassUnderTest("{}");
-		api.createBranch(APP_KEY, branchName, new ApplicationProjectsParameter().addProject("my-project"));
+		api.createBranch(APP_KEY, branchName, new ApplicationProjectsParameter().addProject("my-project").addProjectBranch("projectBranch"));
 
 		List<NameValuePair> parameters = getParameterListFromPostRequest();
 		assertEquals(255, StringUtils.length(getFirstParameterValue(parameters, "branch")));
@@ -164,17 +164,17 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 	@Test
 	void createBranch_noBranch() {
 		ApplicationsApi api = buildClassUnderTest("{}");
-		assertTrue(api.createBranch(APP_KEY, "",
-				new ApplicationProjectsParameter().addProject("my-project").addProjectBranch("projectBranch"))
-				.isSuccess());
+		ApplicationProjectsParameter parameters = new ApplicationProjectsParameter().addProject("my-project").addProjectBranch("projectBranch");
+		assertThrows(SonarQubeUnexpectedException.class,
+				() -> api.createBranch(APP_KEY, "", parameters));
 	}
 
 	@Test
 	void createBranch_noProjectBranch() {
 		ApplicationsApi api = buildClassUnderTest("{}");
-		assertTrue(api.createBranch(APP_KEY, "branch",
-				new ApplicationProjectsParameter().addProject("my-project"))
-				.isSuccess());
+		ApplicationProjectsParameter parameters = new ApplicationProjectsParameter().addProject("my-project");
+		assertThrows(SonarQubeUnexpectedException.class,
+				() -> api.createBranch(APP_KEY, "branch", parameters));
 	}
 
 	@Test
@@ -493,27 +493,25 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 	void updateBranch_tooLongBranchName() {
 		String branchName = RandomStringUtils.randomAlphabetic(256);
 		ApplicationsApi api = buildClassUnderTest("{}");
-		api.updateBranch(APP_KEY, branchName, new ApplicationProjectsParameter().addProject("my-project"));
+		api.updateBranch(APP_KEY, branchName, new ApplicationProjectsParameter().addProject("my-project").addProjectBranch("project-branch"));
 
 		List<NameValuePair> parameters = getParameterListFromPostRequest();
 		assertEquals(255, StringUtils.length(getFirstParameterValue(parameters, "branch")));
 	}
 
-	//TODO confirm that this is actually a successful call.
 	@Test
 	void updateBranch_noBranch() {
 		ApplicationsApi api = buildClassUnderTest("{}");
-		assertTrue(api.updateBranch(APP_KEY, "",
-				new ApplicationProjectsParameter().addProject("my-project").addProjectBranch("projectBranch"))
-				.isSuccess());
+		ApplicationProjectsParameter parameters = new ApplicationProjectsParameter().addProject("my-project").addProjectBranch("projectBranch");
+		assertThrows(SonarQubeUnexpectedException.class,
+				() -> api.updateBranch(APP_KEY, "", parameters));
 	}
 
-	//TODO confirm that this is actually a successful call.
 	@Test
 	void updateBranch_noProjectBranch() {
 		ApplicationsApi api = buildClassUnderTest("{}");
-		assertTrue(api.updateBranch(APP_KEY, "branch",
-				new ApplicationProjectsParameter().addProject("my-project"))
-				.isSuccess());
+		ApplicationProjectsParameter parameters = new ApplicationProjectsParameter().addProject("my-project");
+		assertThrows(SonarQubeUnexpectedException.class,
+				() -> api.createBranch(APP_KEY, "branch", parameters));
 	}
 }

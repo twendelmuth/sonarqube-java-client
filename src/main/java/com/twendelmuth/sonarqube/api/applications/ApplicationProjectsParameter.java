@@ -31,4 +31,8 @@ public class ApplicationProjectsParameter {
 		return projectsList.isEmpty();
 	}
 
+	public boolean areProjectBranchesEmpty() {
+		return projectBranchesList.isEmpty();
+	}
+
 }
