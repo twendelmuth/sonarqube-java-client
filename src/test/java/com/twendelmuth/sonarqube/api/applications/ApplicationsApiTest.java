@@ -23,6 +23,7 @@ import com.twendelmuth.sonarqube.api.NameValuePair;
 import com.twendelmuth.sonarqube.api.SonarQubeJsonMapper;
 import com.twendelmuth.sonarqube.api.SonarQubeServer;
 import com.twendelmuth.sonarqube.api.applications.model.Application;
+import com.twendelmuth.sonarqube.api.applications.model.Branch;
 import com.twendelmuth.sonarqube.api.applications.response.ApplicationResponse;
 import com.twendelmuth.sonarqube.api.exception.SonarQubeUnexpectedException;
 import com.twendelmuth.sonarqube.api.logging.SonarQubeTestLogger;
@@ -565,6 +566,11 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 				() -> assertEquals(2, app.getProjects().size()),
 				() -> assertEquals(2, app.getBranches().size()),
 				() -> assertEquals(2, app.getTags().size()));
+
+		Branch branch = app.getBranches().get(0);
+		assertAll(() -> assertEquals("master", branch.getName()),
+				() -> assertTrue(branch.isMain()));
+
 	}
 
 	@Test
