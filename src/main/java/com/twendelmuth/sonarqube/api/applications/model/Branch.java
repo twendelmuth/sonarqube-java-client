@@ -17,7 +17,7 @@ public class Branch {
 		return isMain;
 	}
 
-	public void setMain(boolean isMain) {
+	public void setIsMain(boolean isMain) {
 		this.isMain = isMain;
 	}
 }
