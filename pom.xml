@@ -4,7 +4,6 @@
 	<artifactId>SonarQubeClient</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>SonarQube API Client</name>
-	<description>Simple Lib to interact with the SonarQube API</description>
 	<properties>
 		<java.version>8</java.version>
 		<source.endcoding>UTF-8</source.endcoding>
@@ -147,4 +146,5 @@
 		</plugins>
 	</build>
 
+	<description>Libary to easily interact with the SonarQube WebAPI.</description>
 </project>

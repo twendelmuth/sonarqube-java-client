@@ -1,6 +1,7 @@
 package com.twendelmuth.sonarqube.api.applications;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -19,27 +20,43 @@ import com.twendelmuth.sonarqube.api.response.SonarApiResponse;
  *
  */
 public class ApplicationsApi extends AbstractApiEndPoint {
-	private static final String PROJECT_BRANCH_PARAMETER = "projectBranch";
+	protected static final String PROJECT_BRANCH_PARAMETER = "projectBranch";
 
-	private static final String BRANCH_PARAMETER = "branch";
+	protected static final String BRANCH_PARAMETER = "branch";
 
-	private static final String VISIBILITY_PARAMETER = "visibility";
+	protected static final String VISIBILITY_PARAMETER = "visibility";
 
-	private static final String KEY_PARAMETER = "key";
+	protected static final String KEY_PARAMETER = "key";
 
-	private static final String DESCRIPTION_PARAMETER = "description";
+	protected static final String DESCRIPTION_PARAMETER = "description";
 
-	private static final String NAME_PARAMETER = "name";
+	protected static final String NAME_PARAMETER = "name";
 
-	private static final String PROJECT_PARAMETER = "project";
+	protected static final String PROJECT_PARAMETER = "project";
 
-	private static final String APPLICATION_PARAMETER = "application";
+	protected static final String TAGS_PARAMETER = "tags";
+
+	protected static final String APPLICATION_PARAMETER = "application";
 
 	private static final String ADD_APPLICATION = "/api/applications/create";
 
 	private static final String ADD_PROJECT = "/api/applications/add_project";
 
 	private static final String DELETE_APPLICATION = "/api/applications/delete";
+
+	private static final String DELETE_BRANCH = "/api/applications/delete_branch";
+
+	private static final String REMOVE_PROJECT = "/api/applications/remove_project";
+
+	private static final String SET_TAGS = "/api/applications/set_tags";
+
+	private static final String UPDATE_APPLICATION = "/api/applications/update";
+
+	private static final String CREATE_BRANCH = "/api/applications/create_branch";
+
+	private static final String UPDATE_BRANCH = "/api/applications/update_branch";
+
+	private static final String SHOW_APPLICATION = "/api/applications/show";
 
 	public ApplicationsApi(SonarQubeServer server, SonarQubeJsonMapper jsonMapper, SonarQubeLogger logger) {
 		super(server, jsonMapper, logger);
@@ -60,6 +77,12 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	private void assertNameParameter(String name) {
 		if (StringUtils.isBlank(name)) {
 			throw new SonarQubeUnexpectedException("Name cannot be empty");
+		}
+	}
+
+	private void assertBranchParameter(String branch) {
+		if (StringUtils.isBlank(branch)) {
+			throw new SonarQubeUnexpectedException("Branch cannot be empty");
 		}
 	}
 
@@ -115,12 +138,21 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	 * @return
 	 */
 	public SonarApiResponse createBranch(String application, String branch, ApplicationProjectsParameter applicationProjectsParameter) {
+		return postForBranch(CREATE_BRANCH, application, branch, applicationProjectsParameter);
+	}
+
+	private SonarApiResponse postForBranch(String endPoint, String application, String branch,
+			ApplicationProjectsParameter applicationProjectsParameter) {
 		assertApplicationParameter(application);
+		assertBranchParameter(branch);
 		if (applicationProjectsParameter == null) {
 			throw new SonarQubeUnexpectedException("applicationProjectsParameter is required");
 		}
 		if (applicationProjectsParameter.areProjectsEmpty()) {
 			throw new SonarQubeUnexpectedException("Need at least one project");
+		}
+		if (applicationProjectsParameter.areProjectBranchesEmpty()) {
+			throw new SonarQubeUnexpectedException("Need at least one project-branch");
 		}
 
 		List<NameValuePair> parameters = new ArrayList<>();
@@ -135,7 +167,7 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 		applicationProjectsParameter.getProjectBranchesList().stream()
 				.forEach(projectBranch -> parameters.add(new NameValuePair(PROJECT_BRANCH_PARAMETER, projectBranch)));
 
-		return doPostWithErrorHandling(ADD_PROJECT, parameters, SonarApiResponse.class);
+		return doPostWithErrorHandling(endPoint, parameters, SonarApiResponse.class);
 	}
 
 	/**
@@ -145,9 +177,7 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	 * @return If call was successful
 	 */
 	public SonarApiResponse deleteApplication(String application) {
-		if (StringUtils.isBlank(application)) {
-			throw new SonarQubeUnexpectedException("Application cannot be empty");
-		}
+		assertApplicationParameter(application);
 
 		List<NameValuePair> parameters = NameValuePair.listOf(APPLICATION_PARAMETER, application);
 		return doPostWithErrorHandling(DELETE_APPLICATION, parameters, SonarApiResponse.class);
@@ -160,8 +190,12 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	 * @param branch Branch name
 	 * @return If call was successful
 	 */
-	public boolean deleteBranch(String application, String branch) {
-		throw new UnsupportedOperationException("Not yet implemented.");
+	public SonarApiResponse deleteBranch(String application, String branch) {
+		assertApplicationParameter(application);
+		assertBranchParameter(branch);
+
+		List<NameValuePair> parameters = NameValuePair.listOf(APPLICATION_PARAMETER, application, BRANCH_PARAMETER, branch);
+		return doPostWithErrorHandling(DELETE_BRANCH, parameters, SonarApiResponse.class);
 	}
 
 	/**
@@ -171,8 +205,12 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	 * @param project Key of the project
 	 * @return If call was successful
 	 */
-	public boolean removeProject(String application, String project) {
-		throw new UnsupportedOperationException("Not yet implemented.");
+	public SonarApiResponse removeProject(String application, String project) {
+		assertApplicationParameter(application);
+		assertProjectParameter(project);
+
+		List<NameValuePair> parameters = NameValuePair.listOf(APPLICATION_PARAMETER, application, PROJECT_PARAMETER, project);
+		return doPostWithErrorHandling(REMOVE_PROJECT, parameters, SonarApiResponse.class);
 	}
 
 	/**
@@ -182,8 +220,19 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	 * @param tags Comma-separated list of tags
 	 * @return If call was successful
 	 */
-	public boolean setTags(String application, String tags) {
-		throw new UnsupportedOperationException("Not yet implemented.");
+	public SonarApiResponse setTags(String application, String tags) {
+		assertApplicationParameter(application);
+
+		if (tags == null) {
+			tags = "";
+		}
+
+		List<NameValuePair> parameters = NameValuePair.listOf(APPLICATION_PARAMETER, application, TAGS_PARAMETER, tags);
+		return doPostWithErrorHandling(SET_TAGS, parameters, SonarApiResponse.class);
+	}
+
+	public SonarApiResponse setTags(String application, Collection<String> tags) {
+		return setTags(application, StringUtils.join(tags, ","));
 	}
 
 	/**
@@ -193,7 +242,26 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	 * @param branch Branch name
 	 */
 	public ApplicationResponse getApplication(String application, String branch) {
-		throw new UnsupportedOperationException("Not yet implemented.");
+		assertApplicationParameter(application);
+
+		StringBuilder parameters = new StringBuilder();
+		parameters.append("?application=").append(application);
+
+		if (StringUtils.isNotBlank(branch)) {
+			parameters.append("&branch=").append(branch);
+		}
+
+		return doGetWithErrorHandling(SHOW_APPLICATION + parameters.toString(), ApplicationResponse.class);
+	}
+
+	/**
+	 * Returns an application and its associated projects.
+	 * Requires the 'Browse' permission on the application and on its child projects.
+	 * @param application Application key
+	 * @param branch Branch name
+	 */
+	public ApplicationResponse getApplication(String application) {
+		return getApplication(application, null);
 	}
 
 	/**
@@ -203,21 +271,29 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	 * @param name New name for the application
 	 * @param description New description for the application (optional)
 	 */
-	public boolean updateApplication(String application, String name, String description) {
-		throw new UnsupportedOperationException("Not yet implemented.");
+	public SonarApiResponse updateApplication(String application, String name, String description) {
+		assertApplicationParameter(application);
+		assertNameParameter(name);
+
+		List<NameValuePair> parameters = NameValuePair.listOf(APPLICATION_PARAMETER, application, NAME_PARAMETER, StringUtils.left(name, 255));
+		if (StringUtils.isNotBlank(description)) {
+			parameters.add(new NameValuePair(DESCRIPTION_PARAMETER, StringUtils.left(description, 255)));
+		}
+
+		return doPostWithErrorHandling(UPDATE_APPLICATION, parameters, SonarApiResponse.class);
 	}
 
 	/**
 	 * Update a branch on a given application.
 	 * Requires 'Administrator' permission on the application and 'Browse' permission on its child projects
-	 * @param application Application key
-	 * @param project
-	 * @param projectBranch
+	 * 
+	 * @param application
 	 * @param branch
-	 * @param name
+	 * @param applicationProjectsParameter
+	 * @return
 	 */
-	public boolean updateBranch(String application, List<String> projects, List<String> projectBranch, String branch, String name) {
-		throw new UnsupportedOperationException("Not yet implemented.");
+	public SonarApiResponse updateBranch(String application, String branch, ApplicationProjectsParameter applicationProjectsParameter) {
+		return postForBranch(UPDATE_BRANCH, application, branch, applicationProjectsParameter);
 	}
 
 }

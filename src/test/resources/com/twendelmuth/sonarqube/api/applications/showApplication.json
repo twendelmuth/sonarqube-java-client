@@ -1,0 +1,41 @@
+{
+  "application": {
+    "key": "MY_APP",
+    "name": "My app",
+    "branch": "master",
+    "isMain": true,
+    "visibility": "public",
+    "projects": [
+      {
+        "key": "project:one",
+        "name": "Project One",
+        "branch": "master",
+        "isMain": true,
+        "enabled": true,
+        "selected": true
+      },
+      {
+        "key": "project:two",
+        "name": "Project Two",
+        "branch": "master",
+        "isMain": true,
+        "enabled": true,
+        "selected": true
+      }
+    ],
+    "branches": [
+      {
+        "name": "master",
+        "isMain": true
+      },
+      {
+        "name": "branch-2.0",
+        "isMain": false
+      }
+    ],
+    "tags": [
+      "react",
+      "spring"
+    ]
+  }
+}

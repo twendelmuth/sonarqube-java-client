@@ -1,6 +1,9 @@
 package com.twendelmuth.sonarqube.api.project.tags;
 
+import java.util.Collection;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.twendelmuth.sonarqube.api.AbstractApiEndPoint;
 import com.twendelmuth.sonarqube.api.NameValuePair;
@@ -22,17 +25,10 @@ public class ProjectTagsApi extends AbstractApiEndPoint {
 	 * Will <strong>overwrite</strong> any existing tags.
 	 * 
 	 * @param projectKey which project should be updated?
-	 * @param tags Set with all the tags
+	 * @param tags Collection with all the tags
 	 */
-	public SonarApiResponse setTags(String projectKey, List<String> tags) {
-		StringBuilder tagBuilder = new StringBuilder();
-		tags.forEach(tag -> {
-			if (tagBuilder.length() > 0) {
-				tagBuilder.append(",");
-			}
-			tagBuilder.append(tag);
-		});
-		return setTags(projectKey, tagBuilder.toString());
+	public SonarApiResponse setTags(String projectKey, Collection<String> tags) {
+		return setTags(projectKey, StringUtils.join(tags, ","));
 	}
 
 	/**

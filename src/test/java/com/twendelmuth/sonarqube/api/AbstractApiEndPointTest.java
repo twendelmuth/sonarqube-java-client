@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentCaptor;
@@ -87,13 +88,39 @@ public abstract class AbstractApiEndPointTest<T extends AbstractApiEndPoint> {
 		}
 	}
 
+	protected String getEndpointFromPostRequest() {
+		try {
+			ArgumentCaptor<String> endpoint = ArgumentCaptor.forClass(String.class);
+			Mockito.verify(getSonarQubeServer()).doPost(endpoint.capture(), any());
+			return endpoint.getValue();
+		} catch (Exception e) {
+			LOGGER.warn("Exception while trying to get endpoint from POST-request", e);
+			return "";
+		}
+	}
+
+	protected String getEndpointFromGetRequest() {
+		try {
+			ArgumentCaptor<String> endpoint = ArgumentCaptor.forClass(String.class);
+			Mockito.verify(getSonarQubeServer()).doGet(endpoint.capture());
+			String endpointString = endpoint.getValue();
+			if (endpointString.contains("?")) {
+				endpointString = endpointString.split("\\?")[0];
+			}
+			return endpointString;
+		} catch (Exception e) {
+			LOGGER.warn("Exception while trying to get endpoint from POST-request", e);
+			return "";
+		}
+	}
+
 	protected List<NameValuePair> getParameterListFromPostRequest() {
 		try {
 			ArgumentCaptor<List<NameValuePair>> endpointParameter = ArgumentCaptor.forClass(List.class);
 			Mockito.verify(getSonarQubeServer()).doPost(anyString(), endpointParameter.capture());
 			return endpointParameter.getValue();
 		} catch (Exception e) {
-			LOGGER.warn("Exception while trying to get parameterMap from GET-request", e);
+			LOGGER.warn("Exception while trying to get parameterMap from POST-request", e);
 			return new ArrayList<>();
 		}
 	}
@@ -105,6 +132,13 @@ public abstract class AbstractApiEndPointTest<T extends AbstractApiEndPoint> {
 		}
 
 		return nameValuePair.getValue();
+	}
+
+	protected List<String> getAllParameterValues(List<NameValuePair> nameValuePairList, String key) {
+		return nameValuePairList.stream()
+				.filter(nvp -> nvp.getName().equals(key))
+				.map(nvp -> nvp.getValue())
+				.collect(Collectors.toList());
 	}
 
 	public SonarQubeTestLogger getTestLogger() {

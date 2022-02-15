@@ -1,5 +1,11 @@
 package com.twendelmuth.sonarqube.api.it.engine;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.junit.jupiter.api.Tag;
+import org.junit.platform.engine.TestTag;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor;
 import org.junit.platform.engine.support.descriptor.ClassSource;
@@ -37,6 +43,14 @@ public class IntegrationTestEngineTestDescriptor extends AbstractTestDescriptor 
 
 	public boolean isShouldStartServer() {
 		return shouldStartServer;
+	}
+
+	@Override
+	public Set<TestTag> getTags() {
+		return Arrays.asList(testClass.getAnnotationsByType(Tag.class))
+				.stream()
+				.map(tag -> TestTag.create(tag.value()))
+				.collect(Collectors.toSet());
 	}
 
 }

@@ -19,7 +19,13 @@ import com.twendelmuth.sonarqube.api.it.docker.SonarQubeVersion;
 public class IntegrationSettings {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationSettings.class);
 
+	public static final String SYSTEM_HOME_DIR = "user.home";
+
 	public static final String FILE_LOCATION = "sonarQube_integration_config";
+
+	public static final String HOME_DIR_FILE = "/.twendelmuth/.sonarqube/integrationTests.properties";
+
+	public static final String LOOKUP_HOME_DIR = "sonarqube_integration_lookup_homeDir";
 
 	/**
 	 * Which SonarQube versions are available for the Integration tests?
@@ -44,9 +50,9 @@ public class IntegrationSettings {
 	@VisibleForTesting
 	public Properties initProperties() {
 		configProperties = new Properties(getSystemProperties());
-		try {
-			if (getConfigFileInputStream() != null) {
-				configProperties.load(getConfigFileInputStream());
+		try (InputStream configInputStream = getConfigFileInputStream()) {
+			if (configInputStream != null) {
+				configProperties.load(configInputStream);
 			}
 		} catch (Exception e) {
 			LOGGER.info("Couldn't load integrationTest properties, assuming defaults");
@@ -60,11 +66,30 @@ public class IntegrationSettings {
 
 	protected InputStream getConfigFileInputStream() throws FileNotFoundException {
 		String systemFileLocation = getSystemProperties().getProperty(FILE_LOCATION);
+		File homeDirFile = getFileFromHomeDir();
 		if (StringUtils.isNotBlank(systemFileLocation) && new File(systemFileLocation).exists()) {
 			return new FileInputStream(new File(systemFileLocation));
+		} else if (homeDirFile != null) {
+			return new FileInputStream(homeDirFile);
 		}
 
 		return getClass().getClassLoader().getResourceAsStream(systemFileLocation);
+	}
+
+	protected File getFileFromHomeDir() {
+		String lookupHomeDir = getSystemProperties().getProperty(LOOKUP_HOME_DIR);
+		if (hasHomeDir() && (StringUtils.isBlank(lookupHomeDir) || StringUtils.equalsIgnoreCase("true", lookupHomeDir))) {
+			File file = new File(getSystemProperties().getProperty(SYSTEM_HOME_DIR) + HOME_DIR_FILE);
+			if (file.exists()) {
+				return file;
+			}
+		}
+
+		return null;
+	}
+
+	private boolean hasHomeDir() {
+		return StringUtils.isNotBlank(getSystemProperties().getProperty(SYSTEM_HOME_DIR));
 	}
 
 	public Set<SonarQubeVersion> getAvailableSonarQubeVersions() {
