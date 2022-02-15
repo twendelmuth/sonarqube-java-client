@@ -16,6 +16,10 @@ public class Application {
 
 	private List<Project> projects = new ArrayList<>();
 
+	private List<Branch> branches = new ArrayList<>();
+
+	private List<String> tags = new ArrayList<>();
+
 	public String getKey() {
 		return key;
 	}
@@ -54,5 +58,21 @@ public class Application {
 
 	public void setProjects(List<Project> projects) {
 		this.projects = projects;
+	}
+
+	public List<Branch> getBranches() {
+		return branches;
+	}
+
+	public void setBranches(List<Branch> branches) {
+		this.branches = branches;
+	}
+
+	public List<String> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<String> tags) {
+		this.tags = tags;
 	}
 }

@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +34,10 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 
 	public static String getCreateApplicationResponse() {
 		return IOHelper.getStringFromResource(ApplicationsApiTest.class, "createApplication.json");
+	}
+
+	public static String getShowApplicationResponse() {
+		return IOHelper.getStringFromResource(ApplicationsApiTest.class, "showApplication.json");
 	}
 
 	@Override
@@ -514,4 +519,68 @@ public class ApplicationsApiTest extends AbstractApiEndPointTest<ApplicationsApi
 		assertThrows(SonarQubeUnexpectedException.class,
 				() -> api.createBranch(APP_KEY, "branch", parameters));
 	}
+
+	@Test
+	void getApplication() {
+		ApplicationsApi api = buildClassUnderTest(getShowApplicationResponse());
+
+		ApplicationResponse response = api.getApplication(APP_KEY);
+		assertEquals("/api/applications/show", getEndpointFromGetRequest());
+
+		Map<String, String> getParameters = getParameterMapFromGetRequest();
+		assertAll(
+				() -> assertEquals(APP_KEY, getParameters.get(ApplicationsApi.APPLICATION_PARAMETER)),
+				() -> assertNull(getParameters.get(ApplicationsApi.BRANCH_PARAMETER)));
+
+		assertNotNull(response);
+		Application app = response.getApplication();
+		assertAll(() -> assertEquals("My app", app.getName()),
+				() -> assertEquals(APP_KEY, app.getKey()),
+				() -> assertEquals("public", app.getVisibility()),
+				() -> assertNotNull(app.getProjects()),
+				() -> assertEquals(2, app.getProjects().size()),
+				() -> assertEquals(2, app.getBranches().size()),
+				() -> assertEquals(2, app.getTags().size()));
+
+	}
+
+	@Test
+	void getApplication_branch() {
+		ApplicationsApi api = buildClassUnderTest(getShowApplicationResponse());
+
+		ApplicationResponse response = api.getApplication(APP_KEY, "master");
+		assertEquals("/api/applications/show", getEndpointFromGetRequest());
+
+		Map<String, String> getParameters = getParameterMapFromGetRequest();
+		assertAll(
+				() -> assertEquals(APP_KEY, getParameters.get(ApplicationsApi.APPLICATION_PARAMETER)),
+				() -> assertEquals("master", getParameters.get(ApplicationsApi.BRANCH_PARAMETER)));
+
+		assertNotNull(response);
+		Application app = response.getApplication();
+		assertAll(() -> assertEquals("My app", app.getName()),
+				() -> assertEquals(APP_KEY, app.getKey()),
+				() -> assertEquals("public", app.getVisibility()),
+				() -> assertNotNull(app.getProjects()),
+				() -> assertEquals(2, app.getProjects().size()),
+				() -> assertEquals(2, app.getBranches().size()),
+				() -> assertEquals(2, app.getTags().size()));
+	}
+
+	@Test
+	void getApplication_notFound() {
+		ApplicationsApi api = buildClassUnderTest(404, "{}");
+
+		ApplicationResponse response = api.getApplication(APP_KEY);
+		assertAll(
+				() -> assertFalse(response.isSuccess()),
+				() -> assertEquals(404, response.getStatusCode()));
+	}
+
+	@Test
+	void getApplication_noApplicationParameter() {
+		ApplicationsApi api = buildClassUnderTest(getShowApplicationResponse());
+		assertThrows(SonarQubeUnexpectedException.class, () -> api.getApplication(null));
+	}
+
 }

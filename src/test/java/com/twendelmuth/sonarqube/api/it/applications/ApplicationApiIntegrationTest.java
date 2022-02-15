@@ -67,4 +67,20 @@ class ApplicationApiIntegrationTest extends AbstractSonarQubeIntegrationTest {
 		assertTrue(response.getErrors().isEmpty());
 	}
 
+	@ITest
+	void showApplication(SonarQubeVersion version) throws Exception {
+		SonarQubeClient client = createClient(version);
+		createApplication(client);
+
+		ApplicationResponse response = client.applicationsApi().getApplication(MY_APP);
+
+		Application returnedApplication = response.getApplication();
+		assertAll("Couldn't assert application, returnBody: " + response.getReturnedBody() + ", status: " + response.getStatusCode(),
+				() -> assertTrue(response.isSuccess()),
+				() -> assertEquals("My app", returnedApplication.getName()),
+				() -> assertEquals("My Application", returnedApplication.getDescription()),
+				() -> assertEquals(MY_APP, returnedApplication.getKey()));
+		assertTrue(response.getErrors().isEmpty());
+	}
+
 }

@@ -56,6 +56,8 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 
 	private static final String UPDATE_BRANCH = "/api/applications/update_branch";
 
+	private static final String SHOW_APPLICATION = "/api/applications/show";
+
 	public ApplicationsApi(SonarQubeServer server, SonarQubeJsonMapper jsonMapper, SonarQubeLogger logger) {
 		super(server, jsonMapper, logger);
 	}
@@ -240,7 +242,26 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 	 * @param branch Branch name
 	 */
 	public ApplicationResponse getApplication(String application, String branch) {
-		throw new UnsupportedOperationException("Not yet implemented.");
+		assertApplicationParameter(application);
+
+		StringBuilder parameters = new StringBuilder();
+		parameters.append("?application=").append(application);
+
+		if (StringUtils.isNotBlank(branch)) {
+			parameters.append("&branch=").append(branch);
+		}
+
+		return doGetWithErrorHandling(SHOW_APPLICATION + parameters.toString(), ApplicationResponse.class);
+	}
+
+	/**
+	 * Returns an application and its associated projects.
+	 * Requires the 'Browse' permission on the application and on its child projects.
+	 * @param application Application key
+	 * @param branch Branch name
+	 */
+	public ApplicationResponse getApplication(String application) {
+		return getApplication(application, null);
 	}
 
 	/**
