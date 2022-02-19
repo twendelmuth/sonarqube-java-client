@@ -115,11 +115,11 @@ class ActivitiesParameterTest {
 		assertEquals(
 				"?maxExecutedAt=2022-01-01T01:01:01%2B0000&minSubmittedAt=2022-01-01T01:01:01%2B0000&onlyCurrents=false&ps=30&q=Apache&status=SUCCESS,FAILED,CANCELED,PENDING,IN_PROGRESS&type=REPORT",
 				ActivitiesParameter.builder()
+						.query("Apache")
 						.maxExecutedAt(time)
 						.minSubmittedAt(time)
 						.onlyCurrents(false)
 						.pageSize(30)
-						.query("Apache")
 						.addStatus(ActivitiesStatus.SUCCESS)
 						.addStatus(ActivitiesStatus.FAILED)
 						.addStatus(ActivitiesStatus.CANCELED)
@@ -145,6 +145,27 @@ class ActivitiesParameterTest {
 						.addStatus(ActivitiesStatus.PENDING)
 						.addStatus(ActivitiesStatus.IN_PROGRESS)
 						.type(ActivitiesType.REPORT)
+						.build().toParameterString());
+	}
+
+	@Test
+	void component_overwriteComponent() {
+		assertEquals(
+				"?component=c2",
+				ActivitiesParameter.builder()
+						.component("c1")
+						.component("c2")
+						.build().toParameterString());
+
+	}
+
+	@Test
+	void query_overwriteQuery() {
+		assertEquals(
+				"?q=Apache2",
+				ActivitiesParameter.builder()
+						.query("Apache")
+						.query("Apache2")
 						.build().toParameterString());
 	}
 
