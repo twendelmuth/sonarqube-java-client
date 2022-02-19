@@ -28,6 +28,10 @@ public class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
 		return IOHelper.getStringFromResource(ProjectsApiTest.class, "createProject.json");
 	}
 
+	public static String getCreateProjectExistsJson() {
+		return IOHelper.getStringFromResource(ProjectsApiTest.class, "createProjectExists.json");
+	}
+
 	@Test
 	void createProject() {
 		ProjectsApi projectsApi = buildClassUnderTest(204, getCreateProjectJson());
@@ -41,6 +45,17 @@ public class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
 				() -> assertEquals("TRK", project.getQualifier()),
 				() -> assertEquals("public", project.getVisibility()));
 
+	}
+
+	@Test
+	void createProjectExists() {
+		ProjectsApi projectsApi = buildClassUnderTest(400, getCreateProjectExistsJson());
+		ProjectResponse response = projectsApi.create("project-name", "project-key");
+		assertFalse(response.isSuccess());
+
+		assertAll(
+				() -> assertEquals(1, response.getErrors().size()),
+				() -> assertEquals("Could not create Project, key already exists: project-key", response.getErrors().get(0).getMsg()));
 	}
 
 	@Test
