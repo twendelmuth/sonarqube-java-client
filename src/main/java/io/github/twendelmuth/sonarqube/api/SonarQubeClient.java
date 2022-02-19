@@ -64,4 +64,8 @@ public class SonarQubeClient {
 	public SonarQubeJsonMapper getJsonMapper() {
 		return new SonarQubeJacksonMapper();
 	}
+
+	protected String getServerUrl() {
+		return serverUrl;
+	}
 }
