@@ -157,9 +157,7 @@ public class ApplicationsApi extends AbstractApiEndPoint {
 
 		List<NameValuePair> parameters = new ArrayList<>();
 		parameters.add(new NameValuePair(APPLICATION_PARAMETER, application));
-		if (StringUtils.isNotBlank(branch)) {
-			parameters.add(new NameValuePair(BRANCH_PARAMETER, StringUtils.left(branch, 255)));
-		}
+		parameters.add(new NameValuePair(BRANCH_PARAMETER, StringUtils.left(branch, 255)));
 
 		applicationProjectsParameter.getProjectsList().stream()
 				.forEach(project -> parameters.add(new NameValuePair(PROJECT_PARAMETER, project)));
