@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Tag;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.github.twendelmuth.sonarqube.api.SonarQubeClient;
 import io.github.twendelmuth.sonarqube.api.exception.SonarQubeUnexpectedException;
 import io.github.twendelmuth.sonarqube.api.it.docker.SonarQubeDockerContainer;

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import io.github.twendelmuth.sonarqube.api.exception.SonarQubeClientJsonException;
 
 public class SonarQubeJacksonMapper implements SonarQubeJsonMapper {
