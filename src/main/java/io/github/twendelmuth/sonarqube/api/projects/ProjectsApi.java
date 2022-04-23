@@ -57,7 +57,7 @@ public class ProjectsApi extends AbstractApiEndPoint {
 			throw new SonarQubeValidationException("BulkDelete needs at least one query or analyzedBefore or project parameter");
 		}
 
-		return doPostWithErrorHandling(BULK_DELETE, NameValuePair.listOf("", ""), SonarApiResponse.class);
+		return doPostWithErrorHandling(BULK_DELETE, filters.toParameterList(), SonarApiResponse.class);
 	}
 
 	/**

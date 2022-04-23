@@ -95,7 +95,7 @@ public class ProjectFilterParameter extends AbstractParameter {
 	}
 
 	public String toParameterString() {
-		StringBuffer parameterBuffer = new StringBuffer();
+		StringBuilder parameterBuffer = new StringBuilder();
 		for (NameValuePair nvp : toParameterList()) {
 			if (parameterBuffer.length() > 0) {
 				parameterBuffer.append("&");
