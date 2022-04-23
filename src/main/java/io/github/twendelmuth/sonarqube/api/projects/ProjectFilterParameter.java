@@ -94,6 +94,20 @@ public class ProjectFilterParameter extends AbstractParameter {
 		return nameValuePairs;
 	}
 
+	public String toParameterString() {
+		StringBuffer parameterBuffer = new StringBuffer();
+		for (NameValuePair nvp : toParameterList()) {
+			if (parameterBuffer.length() > 0) {
+				parameterBuffer.append("&");
+			} else {
+				parameterBuffer.append("?");
+			}
+			parameterBuffer.append(nvp.getName()).append("=").append(nvp.getValue());
+		}
+
+		return parameterBuffer.toString();
+	}
+
 	public static ProjectFilterBuilder bulkDeleteProjectFilterBuilder() {
 		return new ProjectFilterBuilder();
 	}
