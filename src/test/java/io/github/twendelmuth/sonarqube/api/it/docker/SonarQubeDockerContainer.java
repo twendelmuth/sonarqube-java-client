@@ -43,7 +43,7 @@ public class SonarQubeDockerContainer {
 			sonarQubeServerContainer = new GenericContainer<>("sonarqube:" + sonarQubeVersion.getDockerTag())
 					.withExposedPorts(9000)
 					.waitingFor(Wait.forLogMessage(".*WebServer is operational.*", 1)
-							.withStartupTimeout(Duration.ofMinutes(2)));
+							.withStartupTimeout(Duration.ofMinutes(3)));
 			sonarQubeServerContainer.start();
 			apiToken = generateServerToken(sonarQubeServerContainer);
 		}
