@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -13,12 +14,13 @@ import io.github.twendelmuth.sonarqube.api.IOHelper;
 import io.github.twendelmuth.sonarqube.api.SonarQubeJsonMapper;
 import io.github.twendelmuth.sonarqube.api.SonarQubeServer;
 import io.github.twendelmuth.sonarqube.api.exception.SonarQubeServerError;
+import io.github.twendelmuth.sonarqube.api.exception.SonarQubeValidationException;
 import io.github.twendelmuth.sonarqube.api.logging.SonarQubeTestLogger;
 import io.github.twendelmuth.sonarqube.api.projects.response.Project;
 import io.github.twendelmuth.sonarqube.api.projects.response.ProjectResponse;
+import io.github.twendelmuth.sonarqube.api.response.SonarApiResponse;
 
 public class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
-
 	@Override
 	protected ProjectsApi buildTestUnderTest(SonarQubeServer sonarQubeServer, SonarQubeJsonMapper jsonMapper, SonarQubeTestLogger testLogger) {
 		return new ProjectsApi(sonarQubeServer, jsonMapper, testLogger);
@@ -37,12 +39,13 @@ public class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
 		ProjectsApi projectsApi = buildClassUnderTest(204, getCreateProjectJson());
 		ProjectResponse response = projectsApi.create("project-name", "project-key");
 		assertTrue(response.isSuccess());
+		assertEquals("/api/projects/create", getEndpointFromPostRequest());
 		Project project = response.getProject();
 		assertAll(
 				() -> assertNotNull(project),
-				() -> assertEquals("project-key", project.getKey()),
-				() -> assertEquals("project-name", project.getName()),
-				() -> assertEquals("TRK", project.getQualifier()),
+				() -> assertEquals("project-123", project.getKey()),
+				() -> assertEquals("project-123", project.getName()),
+				() -> assertEquals("123", project.getQualifier()),
 				() -> assertEquals("public", project.getVisibility()));
 
 	}
@@ -67,7 +70,28 @@ public class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
 	@Test
 	void deleteProject() {
 		ProjectsApi projectsApi = buildClassUnderTest(204, null);
-		assertTrue(projectsApi.delete("project").isSuccess());
+		SonarApiResponse response = projectsApi.delete("project");
+		assertEquals("/api/projects/delete", getEndpointFromPostRequest());
+		assertTrue(response.isSuccess());
+	}
+
+	@Test
+	void bulkDelete() {
+		ProjectsApi projectsApi = buildClassUnderTest(204, null);
+		ProjectFilterParameter parameters = ProjectFilterParameter.bulkDeleteProjectFilterBuilder().query("query").build();
+		SonarApiResponse response = projectsApi.bulkDelete(parameters);
+
+		assertAll(
+				() -> assertTrue(response.isSuccess()),
+				() -> assertEquals("/api/projects/bulk_delete", getEndpointFromPostRequest()),
+				() -> assertEquals("query", getFirstParameterValue(getParameterListFromPostRequest(), "q")));
+	}
+
+	@Test
+	void bulkDelete_notEnoughParameters() {
+		ProjectsApi projectsApi = buildClassUnderTest(204, null);
+		ProjectFilterParameter parameters = new ProjectFilterParameter();
+		assertThrows(SonarQubeValidationException.class, () -> projectsApi.bulkDelete(parameters));
 	}
 
 }

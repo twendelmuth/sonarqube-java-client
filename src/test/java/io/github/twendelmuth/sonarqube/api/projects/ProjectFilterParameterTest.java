@@ -106,7 +106,7 @@ class ProjectFilterParameterTest {
 				.provisionedOnly(true)
 				.build();
 
-		String parameterString = filter.toParameterString();
+		String parameterString = filter.toParameterList();
 
 		String expectedParameterString = "?analyzedBefore=2022-01-01T01:01:01%2B0000&onProvisionedOnly=true&projects=my-project&q=äbc&qualifiers=APP";
 		assertEquals(expectedParameterString, parameterString);

@@ -7,6 +7,7 @@ import io.github.twendelmuth.sonarqube.api.NameValuePair;
 import io.github.twendelmuth.sonarqube.api.SonarQubeJsonMapper;
 import io.github.twendelmuth.sonarqube.api.SonarQubeServer;
 import io.github.twendelmuth.sonarqube.api.exception.NotImplementedYetException;
+import io.github.twendelmuth.sonarqube.api.exception.SonarQubeValidationException;
 import io.github.twendelmuth.sonarqube.api.logging.SonarQubeLogger;
 import io.github.twendelmuth.sonarqube.api.projects.response.ProjectResponse;
 import io.github.twendelmuth.sonarqube.api.response.SonarApiResponse;
@@ -15,6 +16,8 @@ public class ProjectsApi extends AbstractApiEndPoint {
 	private static final String CREATE = "/api/projects/create";
 
 	private static final String DELETE = "/api/projects/delete";
+
+	private static final String BULK_DELETE = "/api/projects/bulk_delete";
 
 	public ProjectsApi(SonarQubeServer server, SonarQubeJsonMapper jsonMapper, SonarQubeLogger logger) {
 		super(server, jsonMapper, logger);
@@ -49,8 +52,12 @@ public class ProjectsApi extends AbstractApiEndPoint {
 	 * Requires 'Administer System' permission.
 	 * At least one parameter is required among analyzedBefore, projects and q
 	 */
-	public void bulkDelete() {
-		throw new NotImplementedYetException();
+	public SonarApiResponse bulkDelete(ProjectFilterParameter filters) {
+		if (filters == null || !filters.hasEnoughParametersForBulkDelete()) {
+			throw new SonarQubeValidationException("BulkDelete needs at least one query or analyzedBefore or project parameter");
+		}
+
+		return doPostWithErrorHandling(BULK_DELETE, NameValuePair.listOf("", ""), SonarApiResponse.class);
 	}
 
 	/**

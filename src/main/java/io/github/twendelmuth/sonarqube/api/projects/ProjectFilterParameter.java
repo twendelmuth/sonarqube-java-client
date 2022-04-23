@@ -2,11 +2,14 @@ package io.github.twendelmuth.sonarqube.api.projects;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
+import io.github.twendelmuth.sonarqube.api.NameValuePair;
 import io.github.twendelmuth.sonarqube.api.util.parameter.AbstractParameter;
 
 public class ProjectFilterParameter extends AbstractParameter {
@@ -43,32 +46,38 @@ public class ProjectFilterParameter extends AbstractParameter {
 
 	}
 
-	public String toParameterString() {
-		StringBuilder parameterBuilder = new StringBuilder();
+	protected boolean hasEnoughParametersForBulkDelete() {
+		return analyzedBeforeDate != null || analyzedBeforeDateTime != null ||
+				!projects.isEmpty() || StringUtils.isNotBlank(query);
+	}
+
+	public List<NameValuePair> toParameterList() {
+		List<NameValuePair> nameValuePairs = new ArrayList<>();
+
 		if (analyzedBeforeDateTime != null) {
-			addParameter(parameterBuilder, "analyzedBefore", formatDateForParameter(analyzedBeforeDateTime));
+			nameValuePairs.add(new NameValuePair("analyzedBefore", formatDateForParameter(analyzedBeforeDateTime)));
 		} else if (analyzedBeforeDate != null) {
-			addParameter(parameterBuilder, "analyzedBefore", formatDateForParameter(analyzedBeforeDate));
+			nameValuePairs.add(new NameValuePair("analyzedBefore", formatDateForParameter(analyzedBeforeDate)));
 		}
 
 		if (onProvisionedOnly != null) {
-			addParameter(parameterBuilder, "onProvisionedOnly", onProvisionedOnly.toString());
+			nameValuePairs.add(new NameValuePair("onProvisionedOnly", onProvisionedOnly.toString()));
 		}
 
 		if (!projects.isEmpty()) {
-			addParameter(parameterBuilder, "projects", setToString(projects));
+			nameValuePairs.add(new NameValuePair("projects", setToString(projects)));
 		}
 
 		if (StringUtils.isNotBlank(query)) {
-			addParameter(parameterBuilder, "q", query);
+			nameValuePairs.add(new NameValuePair("q", query));
 		}
 
 		if (!qualifiers.isEmpty()) {
-			addParameter(parameterBuilder, "qualifiers", setToString(qualifiers));
+			nameValuePairs.add(new NameValuePair("qualifiers", setToString(qualifiers)));
 		}
 
 		if (page != null && page > 0) {
-			addParameter(parameterBuilder, "p", page.toString());
+			nameValuePairs.add(new NameValuePair("p", page.toString()));
 		}
 
 		if (pageSize != null) {
@@ -78,11 +87,11 @@ public class ProjectFilterParameter extends AbstractParameter {
 				pageSize = 500;
 			}
 
-			addParameter(parameterBuilder, "ps", pageSize.toString());
+			nameValuePairs.add(new NameValuePair("ps", pageSize.toString()));
 
 		}
 
-		return parameterBuilder.toString();
+		return nameValuePairs;
 	}
 
 	public static ProjectFilterBuilder bulkDeleteProjectFilterBuilder() {
