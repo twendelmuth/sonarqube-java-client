@@ -1,6 +1,9 @@
 package io.github.twendelmuth.sonarqube.api.projects;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -140,6 +143,24 @@ class ProjectFilterParameterTest {
 	void pageSize_escape500() {
 		ProjectFilterParameter filter = ProjectFilterParameter.searchProjectFilterBuilder().pageSize(501).build();
 		assertEquals("?ps=500", filter.toParameterString());
+	}
+
+	@Test
+	void enoughParameters() {
+		assertAll(
+				() -> assertTrue(ProjectFilterParameter.searchProjectFilterBuilder().analyzedBefore(localDateInThePast()).build()
+						.hasEnoughParametersForBulkDelete()),
+				() -> assertTrue(ProjectFilterParameter.searchProjectFilterBuilder().analyzedBefore(zonedDateTimeInThePast()).build()
+						.hasEnoughParametersForBulkDelete()),
+				() -> assertTrue(ProjectFilterParameter.searchProjectFilterBuilder().addProjectKey("some-project").build()
+						.hasEnoughParametersForBulkDelete()),
+				() -> assertTrue(ProjectFilterParameter.searchProjectFilterBuilder().query("some-query").build()
+						.hasEnoughParametersForBulkDelete()));
+	}
+
+	@Test
+	void notEnoughParameters() {
+		assertFalse(ProjectFilterParameter.searchProjectFilterBuilder().build().hasEnoughParametersForBulkDelete());
 	}
 
 }
