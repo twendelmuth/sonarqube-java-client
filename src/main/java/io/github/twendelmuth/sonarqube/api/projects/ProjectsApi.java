@@ -17,6 +17,10 @@ import io.github.twendelmuth.sonarqube.api.projects.response.ProjectResponse;
 import io.github.twendelmuth.sonarqube.api.response.SonarApiResponse;
 
 public class ProjectsApi extends AbstractApiEndPoint {
+	private static final String PROJECT_PARAMETER = "project";
+
+	private static final String NAME_PARAMETER = "name";
+
 	private static final String CREATE = "/api/projects/create";
 
 	private static final String DELETE = "/api/projects/delete";
@@ -41,7 +45,7 @@ public class ProjectsApi extends AbstractApiEndPoint {
 	 * @return If the operation was successful
 	 */
 	public ProjectResponse create(String name, String project) {
-		List<NameValuePair> parameters = NameValuePair.listOf("name", name, "project", project);
+		List<NameValuePair> parameters = NameValuePair.listOf(NAME_PARAMETER, name, PROJECT_PARAMETER, project);
 
 		return doPostWithErrorHandling(CREATE, parameters, ProjectResponse.class);
 	}
@@ -52,7 +56,7 @@ public class ProjectsApi extends AbstractApiEndPoint {
 	 * @return If the operation was successful
 	 */
 	public SonarApiResponse delete(String projectKey) {
-		List<NameValuePair> parameters = NameValuePair.listOf("project", projectKey);
+		List<NameValuePair> parameters = NameValuePair.listOf(PROJECT_PARAMETER, projectKey);
 		return doPostWithErrorHandling(DELETE, parameters, SonarApiResponse.class);
 	}
 
@@ -110,7 +114,7 @@ public class ProjectsApi extends AbstractApiEndPoint {
 			throw new SonarQubeValidationException("ProjectVisibility can't be null");
 		}
 
-		return doPostWithErrorHandling(UPDATE_VISIBILITY, NameValuePair.listOf("project", projectName, "visibility", visibility.getApiName()),
+		return doPostWithErrorHandling(UPDATE_VISIBILITY, NameValuePair.listOf(PROJECT_PARAMETER, projectName, "visibility", visibility.getApiName()),
 				SonarApiResponse.class);
 	}
 
