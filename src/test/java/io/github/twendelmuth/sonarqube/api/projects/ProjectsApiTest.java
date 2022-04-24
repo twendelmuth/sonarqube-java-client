@@ -112,6 +112,12 @@ public class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
 	}
 
 	@Test
+	void bulkDelete_nullParameters() {
+		ProjectsApi projectsApi = buildClassUnderTest(204, null);
+		assertThrows(SonarQubeValidationException.class, () -> projectsApi.bulkDelete(null));
+	}
+
+	@Test
 	void updateKey() {
 		ProjectsApi projectsApi = buildClassUnderTest(200, null);
 
@@ -174,6 +180,16 @@ public class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
 				() -> assertNotNull(response.getComponents()),
 				() -> assertEquals(2, response.getComponents().size()),
 				() -> assertEquals("project-key-1", response.getComponents().get(0).getKey()));
+	}
+
+	@Test
+	void search_nullParameter() {
+		ProjectsApi projectsApi = buildClassUnderTest(200, getSearchProjectJson());
+
+		SearchProjectResponse response = projectsApi.search(null);
+		assertAll(
+				() -> assertEquals("/api/projects/search", getEndpointFromGetRequest()),
+				() -> assertTrue(response.isSuccess()));
 	}
 
 	@Test
