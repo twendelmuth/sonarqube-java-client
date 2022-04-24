@@ -1,14 +1,14 @@
 package io.github.twendelmuth.sonarqube.api.ce;
 
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class ActivitiesParameter {
-	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ssZ");
+import io.github.twendelmuth.sonarqube.api.util.parameter.AbstractParameter;
+
+public class ActivitiesParameter extends AbstractParameter {
 
 	private String component;
 
@@ -60,7 +60,7 @@ public class ActivitiesParameter {
 		}
 
 		if (!status.isEmpty()) {
-			addParameter(parameterBuilder, "status", getStatusString(status));
+			addParameter(parameterBuilder, "status", setToString(status));
 		}
 
 		if (type != null) {
@@ -68,33 +68,6 @@ public class ActivitiesParameter {
 		}
 
 		return parameterBuilder.toString();
-	}
-
-	private String formatDateForParameter(ZonedDateTime date) {
-		return DATE_FORMATTER.format(date).replace("+", "%2B");
-	}
-
-	private String getStatusString(Set<ActivitiesStatus> statusSet) {
-		StringBuilder statusString = new StringBuilder();
-		statusSet.forEach(innerStatus -> {
-			if (statusString.length() > 0) {
-				statusString.append(",");
-			}
-			statusString.append(innerStatus.name());
-		});
-
-		return statusString.toString();
-	}
-
-	private StringBuilder addParameter(StringBuilder builder, String key, String value) {
-		if (builder.length() == 0) {
-			builder.append("?");
-		} else {
-			builder.append("&");
-		}
-
-		builder.append(key).append("=").append(value);
-		return builder;
 	}
 
 	public enum ActivitiesStatus {
