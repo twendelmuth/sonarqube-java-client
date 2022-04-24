@@ -23,6 +23,8 @@ public class ProjectsApi extends AbstractApiEndPoint {
 
 	private static final String UPDATE_KEY = "/api/projects/update_key";
 
+	private static final String UPDATE_VISIBILITY = "/api/projects/update_visibility";
+
 	public ProjectsApi(SonarQubeServer server, SonarQubeJsonMapper jsonMapper, SonarQubeLogger logger) {
 		super(server, jsonMapper, logger);
 	}
@@ -92,7 +94,15 @@ public class ProjectsApi extends AbstractApiEndPoint {
 	 * Requires 'Project administer' permission on the specified project or view
 	 */
 	public SonarApiResponse updateVisibility(String projectName, ProjectVisibility visibility) {
-		throw new NotImplementedYetException();
+		if (StringUtils.isBlank(projectName)) {
+			throw new SonarQubeValidationException("ProjectName can't be empty");
+		}
+		if (visibility == null) {
+			throw new SonarQubeValidationException("ProjectVisibility can't be null");
+		}
+
+		return doPostWithErrorHandling(UPDATE_VISIBILITY, NameValuePair.listOf("project", projectName, "visibility", visibility.getApiName()),
+				SonarApiResponse.class);
 	}
 
 }

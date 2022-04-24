@@ -116,4 +116,27 @@ public class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
 		ProjectsApi projectsApi = buildClassUnderTest(200, null);
 		assertThrows(SonarQubeValidationException.class, () -> projectsApi.updateKey("project1", null));
 	}
+
+	@Test
+	void updateVisibility() {
+		ProjectsApi projectsApi = buildClassUnderTest(200, null);
+		SonarApiResponse response = projectsApi.updateVisibility("project1", ProjectVisibility.PRIVATE);
+		assertAll(
+				() -> assertTrue(response.isSuccess()),
+				() -> assertEquals("/api/projects/update_visibility", getEndpointFromPostRequest()),
+				() -> assertEquals("project1", getFirstParameterValue(getParameterListFromPostRequest(), "project")),
+				() -> assertEquals("private", getFirstParameterValue(getParameterListFromPostRequest(), "visibility")));
+	}
+
+	@Test
+	void updateVisibility_noProject() {
+		ProjectsApi projectsApi = buildClassUnderTest(200, null);
+		assertThrows(SonarQubeValidationException.class, () -> projectsApi.updateVisibility(null, ProjectVisibility.PRIVATE));
+	}
+
+	@Test
+	void updateVisibility_noVisibility() {
+		ProjectsApi projectsApi = buildClassUnderTest(200, null);
+		assertThrows(SonarQubeValidationException.class, () -> projectsApi.updateVisibility("project1", null));
+	}
 }
