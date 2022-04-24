@@ -2,6 +2,8 @@ package io.github.twendelmuth.sonarqube.api.projects;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import io.github.twendelmuth.sonarqube.api.AbstractApiEndPoint;
 import io.github.twendelmuth.sonarqube.api.NameValuePair;
 import io.github.twendelmuth.sonarqube.api.SonarQubeJsonMapper;
@@ -18,6 +20,8 @@ public class ProjectsApi extends AbstractApiEndPoint {
 	private static final String DELETE = "/api/projects/delete";
 
 	private static final String BULK_DELETE = "/api/projects/bulk_delete";
+
+	private static final String UPDATE_KEY = "/api/projects/update_key";
 
 	public ProjectsApi(SonarQubeServer server, SonarQubeJsonMapper jsonMapper, SonarQubeLogger logger) {
 		super(server, jsonMapper, logger);
@@ -64,7 +68,7 @@ public class ProjectsApi extends AbstractApiEndPoint {
 	 * Search for projects or views to administrate them.
 	 * Requires 'Administer System' permission
 	 */
-	public void search() {
+	public SonarApiResponse search() {
 		throw new NotImplementedYetException();
 	}
 
@@ -72,15 +76,22 @@ public class ProjectsApi extends AbstractApiEndPoint {
 	 * Update a project all its sub-components keys.
 	 * Requires one of the following permissions:
 	 */
-	public void updateKey(String from, String to) {
-		throw new NotImplementedYetException();
+	public SonarApiResponse updateKey(String from, String to) {
+		if (StringUtils.isBlank(from)) {
+			throw new SonarQubeValidationException("From can't be empty");
+		}
+		if (StringUtils.isBlank(to)) {
+			throw new SonarQubeValidationException("To can't be empty");
+		}
+
+		return doPostWithErrorHandling(UPDATE_KEY, NameValuePair.listOf("from", from, "to", to), SonarApiResponse.class);
 	}
 
 	/**
 	 * Updates visibility of a project or view.
 	 * Requires 'Project administer' permission on the specified project or view
 	 */
-	public void updateVisibility(String projectName, ProjectVisibility visibility) {
+	public SonarApiResponse updateVisibility(String projectName, ProjectVisibility visibility) {
 		throw new NotImplementedYetException();
 	}
 

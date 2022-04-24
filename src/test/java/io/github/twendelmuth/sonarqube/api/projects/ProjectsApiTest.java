@@ -93,4 +93,27 @@ public class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
 		assertThrows(SonarQubeValidationException.class, () -> projectsApi.bulkDelete(parameters));
 	}
 
+	@Test
+	void updateKey() {
+		ProjectsApi projectsApi = buildClassUnderTest(200, null);
+
+		SonarApiResponse response = projectsApi.updateKey("project1", "project2");
+		assertAll(
+				() -> assertTrue(response.isSuccess()),
+				() -> assertEquals("/api/projects/update_key", getEndpointFromPostRequest()),
+				() -> assertEquals("project1", getFirstParameterValue(getParameterListFromPostRequest(), "from")),
+				() -> assertEquals("project2", getFirstParameterValue(getParameterListFromPostRequest(), "to")));
+	}
+
+	@Test
+	void updateKey_fromNull() {
+		ProjectsApi projectsApi = buildClassUnderTest(200, null);
+		assertThrows(SonarQubeValidationException.class, () -> projectsApi.updateKey(null, "project2"));
+	}
+
+	@Test
+	void updateKey_toNull() {
+		ProjectsApi projectsApi = buildClassUnderTest(200, null);
+		assertThrows(SonarQubeValidationException.class, () -> projectsApi.updateKey("project1", null));
+	}
 }
