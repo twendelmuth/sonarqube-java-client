@@ -16,6 +16,7 @@ import io.github.twendelmuth.sonarqube.api.SonarQubeServer;
 import io.github.twendelmuth.sonarqube.api.exception.SonarQubeServerError;
 import io.github.twendelmuth.sonarqube.api.exception.SonarQubeValidationException;
 import io.github.twendelmuth.sonarqube.api.logging.SonarQubeTestLogger;
+import io.github.twendelmuth.sonarqube.api.projects.ProjectFilterParameter.ProjectFilterBuilder;
 import io.github.twendelmuth.sonarqube.api.projects.response.Project;
 import io.github.twendelmuth.sonarqube.api.projects.response.ProjectResponse;
 import io.github.twendelmuth.sonarqube.api.response.SonarApiResponse;
@@ -77,7 +78,7 @@ public class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
 	@Test
 	void bulkDelete() {
 		ProjectsApi projectsApi = buildClassUnderTest(204, null);
-		ProjectFilterParameter parameters = ProjectFilterParameter.bulkDeleteProjectFilterBuilder().query("query").build();
+		ProjectFilterBuilder parameters = ProjectFilterParameter.bulkDeleteProjectFilterBuilder().query("query");
 		SonarApiResponse response = projectsApi.bulkDelete(parameters);
 
 		assertAll(
@@ -89,8 +90,8 @@ public class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
 	@Test
 	void bulkDelete_notEnoughParameters() {
 		ProjectsApi projectsApi = buildClassUnderTest(204, null);
-		ProjectFilterParameter parameters = new ProjectFilterParameter();
-		assertThrows(SonarQubeValidationException.class, () -> projectsApi.bulkDelete(parameters));
+		ProjectFilterBuilder filterBuilder = ProjectFilterParameter.bulkDeleteProjectFilterBuilder();
+		assertThrows(SonarQubeValidationException.class, () -> projectsApi.bulkDelete(filterBuilder));
 	}
 
 	@Test

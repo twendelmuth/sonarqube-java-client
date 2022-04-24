@@ -11,6 +11,8 @@ import io.github.twendelmuth.sonarqube.api.SonarQubeServer;
 import io.github.twendelmuth.sonarqube.api.exception.NotImplementedYetException;
 import io.github.twendelmuth.sonarqube.api.exception.SonarQubeValidationException;
 import io.github.twendelmuth.sonarqube.api.logging.SonarQubeLogger;
+import io.github.twendelmuth.sonarqube.api.projects.ProjectFilterParameter.ProjectFilterBuilder;
+import io.github.twendelmuth.sonarqube.api.projects.ProjectFilterParameter.ProjectSearchFilterBuilder;
 import io.github.twendelmuth.sonarqube.api.projects.response.ProjectResponse;
 import io.github.twendelmuth.sonarqube.api.response.SonarApiResponse;
 
@@ -58,19 +60,19 @@ public class ProjectsApi extends AbstractApiEndPoint {
 	 * Requires 'Administer System' permission.
 	 * At least one parameter is required among analyzedBefore, projects and q
 	 */
-	public SonarApiResponse bulkDelete(ProjectFilterParameter filters) {
-		if (filters == null || !filters.hasEnoughParametersForBulkDelete()) {
+	public SonarApiResponse bulkDelete(ProjectFilterBuilder filters) {
+		if (filters == null || !filters.build().hasEnoughParametersForBulkDelete()) {
 			throw new SonarQubeValidationException("BulkDelete needs at least one query or analyzedBefore or project parameter");
 		}
 
-		return doPostWithErrorHandling(BULK_DELETE, filters.toParameterList(), SonarApiResponse.class);
+		return doPostWithErrorHandling(BULK_DELETE, filters.build().toParameterList(), SonarApiResponse.class);
 	}
 
 	/**
 	 * Search for projects or views to administrate them.
 	 * Requires 'Administer System' permission
 	 */
-	public SonarApiResponse search() {
+	public SonarApiResponse search(ProjectSearchFilterBuilder filters) {
 		throw new NotImplementedYetException();
 	}
 
