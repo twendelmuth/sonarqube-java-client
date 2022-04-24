@@ -7,16 +7,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+
 import org.junit.jupiter.api.Test;
 
 import io.github.twendelmuth.sonarqube.api.AbstractApiEndPointTest;
 import io.github.twendelmuth.sonarqube.api.IOHelper;
 import io.github.twendelmuth.sonarqube.api.SonarQubeJsonMapper;
 import io.github.twendelmuth.sonarqube.api.SonarQubeServer;
+import io.github.twendelmuth.sonarqube.api.components.response.SearchProjectResponse;
 import io.github.twendelmuth.sonarqube.api.exception.SonarQubeServerError;
 import io.github.twendelmuth.sonarqube.api.exception.SonarQubeValidationException;
 import io.github.twendelmuth.sonarqube.api.logging.SonarQubeTestLogger;
 import io.github.twendelmuth.sonarqube.api.projects.ProjectFilterParameter.ProjectFilterBuilder;
+import io.github.twendelmuth.sonarqube.api.projects.ProjectFilterParameter.ProjectQualifier;
+import io.github.twendelmuth.sonarqube.api.projects.ProjectFilterParameter.ProjectSearchFilterBuilder;
 import io.github.twendelmuth.sonarqube.api.projects.response.Project;
 import io.github.twendelmuth.sonarqube.api.projects.response.ProjectResponse;
 import io.github.twendelmuth.sonarqube.api.response.SonarApiResponse;
@@ -33,6 +42,14 @@ public class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
 
 	public static String getCreateProjectExistsJson() {
 		return IOHelper.getStringFromResource(ProjectsApiTest.class, "createProjectExists.json");
+	}
+
+	public static String getSearchProjectJson() {
+		return IOHelper.getStringFromResource(ProjectsApiTest.class, "searchProject.json");
+	}
+
+	private ZonedDateTime zonedDateTimeInThePast() {
+		return ZonedDateTime.ofInstant(LocalDateTime.of(2022, Month.JANUARY, 1, 1, 1, 1, 0), ZoneOffset.UTC, ZoneId.of("Z"));
 	}
 
 	@Test
@@ -140,4 +157,65 @@ public class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
 		ProjectsApi projectsApi = buildClassUnderTest(200, null);
 		assertThrows(SonarQubeValidationException.class, () -> projectsApi.updateVisibility("project1", null));
 	}
+
+	@Test
+	void search() {
+		ProjectsApi projectsApi = buildClassUnderTest(200, getSearchProjectJson());
+		ProjectSearchFilterBuilder filter = ProjectFilterParameter.searchProjectFilterBuilder();
+
+		SearchProjectResponse response = projectsApi.search(filter);
+		assertAll(
+				() -> assertEquals("/api/projects/search", getEndpointFromGetRequest()),
+				() -> assertTrue(response.isSuccess()),
+				() -> assertNotNull(response.getPaging()),
+				() -> assertEquals(1, response.getPaging().getPageIndex()),
+				() -> assertEquals(2, response.getPaging().getTotal()),
+				() -> assertEquals(100, response.getPaging().getPageSize()),
+				() -> assertNotNull(response.getComponents()),
+				() -> assertEquals(2, response.getComponents().size()),
+				() -> assertEquals("project-key-1", response.getComponents().get(0).getKey()));
+	}
+
+	@Test
+	void search_query() {
+		ProjectsApi projectsApi = buildClassUnderTest(200, getSearchProjectJson());
+		ProjectSearchFilterBuilder filter = ProjectFilterParameter.searchProjectFilterBuilder();
+		filter.query("testing");
+
+		SearchProjectResponse response = projectsApi.search(filter);
+		assertAll(
+				() -> assertEquals("/api/projects/search", getEndpointFromGetRequest()),
+				() -> assertTrue(response.isSuccess()),
+				() -> assertEquals("testing", getParameterMapFromGetRequest().get("q")));
+	}
+
+	@Test
+	void search_allParameters() {
+		ProjectsApi projectsApi = buildClassUnderTest(200, getSearchProjectJson());
+		ProjectSearchFilterBuilder filter = ProjectFilterParameter.searchProjectFilterBuilder();
+		filter.analyzedBefore(zonedDateTimeInThePast());
+		filter.provisionedOnly(true);
+		filter.page(1);
+		filter.pageSize(100);
+		filter.addProjectKey("project1");
+		filter.addProjectKey("project2");
+		filter.query("testing");
+		filter.addQualifier(ProjectQualifier.APP);
+		filter.addQualifier(ProjectQualifier.TRK);
+
+		SearchProjectResponse response = projectsApi.search(filter);
+		assertAll(
+				() -> assertEquals("/api/projects/search", getEndpointFromGetRequest()),
+				() -> assertTrue(response.isSuccess()),
+				() -> assertEquals("2022-01-01T01:01:01%2B0000", getParameterMapFromGetRequest().get("analyzedBefore")),
+				() -> assertEquals("true", getParameterMapFromGetRequest().get("onProvisionedOnly")),
+				() -> assertEquals("1", getParameterMapFromGetRequest().get("p")),
+				() -> assertEquals("100", getParameterMapFromGetRequest().get("ps")),
+				() -> assertEquals("project1,project2", getParameterMapFromGetRequest().get("projects")),
+				() -> assertEquals("testing", getParameterMapFromGetRequest().get("q")),
+				() -> assertEquals("APP,TRK", getParameterMapFromGetRequest().get("qualifiers"))
+
+		);
+	}
+
 }

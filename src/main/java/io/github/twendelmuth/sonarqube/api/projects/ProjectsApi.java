@@ -8,7 +8,7 @@ import io.github.twendelmuth.sonarqube.api.AbstractApiEndPoint;
 import io.github.twendelmuth.sonarqube.api.NameValuePair;
 import io.github.twendelmuth.sonarqube.api.SonarQubeJsonMapper;
 import io.github.twendelmuth.sonarqube.api.SonarQubeServer;
-import io.github.twendelmuth.sonarqube.api.exception.NotImplementedYetException;
+import io.github.twendelmuth.sonarqube.api.components.response.SearchProjectResponse;
 import io.github.twendelmuth.sonarqube.api.exception.SonarQubeValidationException;
 import io.github.twendelmuth.sonarqube.api.logging.SonarQubeLogger;
 import io.github.twendelmuth.sonarqube.api.projects.ProjectFilterParameter.ProjectFilterBuilder;
@@ -26,6 +26,8 @@ public class ProjectsApi extends AbstractApiEndPoint {
 	private static final String UPDATE_KEY = "/api/projects/update_key";
 
 	private static final String UPDATE_VISIBILITY = "/api/projects/update_visibility";
+
+	private static final String SEARCH = "/api/projects/search";
 
 	public ProjectsApi(SonarQubeServer server, SonarQubeJsonMapper jsonMapper, SonarQubeLogger logger) {
 		super(server, jsonMapper, logger);
@@ -72,8 +74,13 @@ public class ProjectsApi extends AbstractApiEndPoint {
 	 * Search for projects or views to administrate them.
 	 * Requires 'Administer System' permission
 	 */
-	public SonarApiResponse search(ProjectSearchFilterBuilder filters) {
-		throw new NotImplementedYetException();
+	public SearchProjectResponse search(ProjectSearchFilterBuilder filters) {
+		String parameters = "";
+		if (filters != null) {
+			parameters = filters.build().toParameterString();
+		}
+
+		return doGetWithErrorHandling(SEARCH + parameters, SearchProjectResponse.class);
 	}
 
 	/**
