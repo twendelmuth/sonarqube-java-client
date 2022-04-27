@@ -29,7 +29,7 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Build, verify and deploy
-        run: mvn -B -Dsonarqube.versions=V8_9_LATEST,V9_LATEST,V9_LATEST_DEVELOPER,V9_LATEST_ENTERPRISE deploy
+        run: mvn -B -Darguments='-Dsonarqube.versions=V8_9_LATEST,V9_LATEST,V9_LATEST_DEVELOPER,V9_LATEST_ENTERPRISE' release:prepare release:perform
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up JDK 11
