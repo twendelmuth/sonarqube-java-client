@@ -30,7 +30,7 @@ jobs:
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
       - name: Build and verify
-        run: mvn -B release:prepare release:perform
+        run: mvn -B -Darguments='-Dsonarqube.versions=V8_9_LATEST,V9_LATEST,V9_LATEST_DEVELOPER,V9_LATEST_ENTERPRISE' release:prepare release:perform
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
