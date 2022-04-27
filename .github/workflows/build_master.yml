@@ -28,6 +28,10 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+      - name: Configure Git user
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
       - name: Build, verify and deploy
         run: mvn -B -Darguments='-Dsonarqube.versions=V8_9_LATEST,V9_LATEST,V9_LATEST_DEVELOPER,V9_LATEST_ENTERPRISE' release:prepare release:perform
         env:
