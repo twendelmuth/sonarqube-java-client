@@ -23,7 +23,7 @@
 	</licenses>
 	<scm>
 		<connection>scm:git:git://github.com/twendelmuth/sonarqube-java-client.git</connection>
-		<developerConnection>scm:git:ssh://github.com:twendelmuth/sonarqube-java-client.git</developerConnection>
+		<developerConnection>scm:git:https://github.com/twendelmuth/sonarqube-java-client.git</developerConnection>
 		<url>https://github.com/twendelmuth/sonarqube-java-client</url>
 	</scm>
 <distributionManagement>
