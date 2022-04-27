@@ -26,6 +26,13 @@
 		<developerConnection>scm:git:ssh://github.com:twendelmuth/sonarqube-java-client.git</developerConnection>
 		<url>https://github.com/twendelmuth/sonarqube-java-client</url>
 	</scm>
+<distributionManagement>
+	<repository>
+		<id>github</id>
+		<name>GitHub OWNER Apache Maven Packages</name>
+		<url>https://maven.pkg.github.com/twendelmuth/sonarqube-java-client</url>
+	</repository>
+</distributionManagement>
 
 	<dependencies>
 		<dependency>

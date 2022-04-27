@@ -1,8 +1,5 @@
-name: Build
+name: Build Pull Requests
 on:
-  push:
-    branches:
-      - main
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
@@ -42,4 +39,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          
+      
