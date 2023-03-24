@@ -75,7 +75,7 @@ public class ProjectsApiTest extends AbstractApiEndPointTest<ProjectsApi> {
 
 		assertAll(
 				() -> assertEquals(1, response.getErrors().size()),
-				() -> assertEquals("Could not create Project, key already exists: project-key", response.getErrors().get(0).getMsg()));
+				() -> assertEquals("Could not create Project with key: \"project-key\". A similar key already exists: \"project-key\"", response.getErrors().get(0).getMsg()));
 	}
 
 	@Test

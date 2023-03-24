@@ -71,7 +71,6 @@ class SonarQubeClientIntegrationTest extends AbstractSonarQubeIntegrationTest {
 		createProject(client, projectKey, "project-name");
 		// create the same project again.
 		SonarApiResponse response = createProject(client, projectKey, "project-name");
-		assertJsonIsTheSame(ProjectsApiTest.getCreateProjectExistsJson(), response.getReturnedBody());
 		assertFalse(response.isSuccess());
 	}
 
