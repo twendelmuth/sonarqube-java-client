@@ -7,7 +7,7 @@
 	<properties>
 		<java.version>8</java.version>
 		<source.endcoding>UTF-8</source.endcoding>
-		<testcontainers.version>1.17.1</testcontainers.version>
+		<testcontainers.version>1.20.3</testcontainers.version>
 		<sonar.organization>twendelmuth</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
